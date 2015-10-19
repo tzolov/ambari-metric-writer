@@ -21,6 +21,8 @@ package org.springframework.boot.actuate.metrics.ambari;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import it.unimi.dsi.fastutil.longs.Long2FloatArrayMap;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -58,7 +60,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author christian.tzolov@gmail.com
  *
  */
-public abstract class AbstractAmbariMetricWriter implements MetricWriter {
+public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closeable {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractAmbariMetricWriter.class);
 
@@ -292,6 +294,27 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter {
 
 		// Clears the metrics list as well
 		this.timelineMetricsPool.returnObject(timelineMetrics);
+	}
+
+	@Override
+	public void close() throws IOException {
+
+		try {
+			if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
+				try {
+					metricBuffer.clear();
+
+					timelineMetricPool.clear();
+					timelineMetricPool.close();
+					timelineMetricsPool.clear();
+					timelineMetricsPool.close();
+				} finally {
+					bufferLock.unlock();
+				}
+			}
+		} catch (InterruptedException e) {
+			logger.warn("", e);
+		}
 	}
 
 	public String getApplicationId() {

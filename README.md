@@ -8,6 +8,8 @@
 The `ambari-metric-writer` allows you to export (at real time) all application metrics to [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
 
 
+A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), writing metrics to the HTTP endpoint provided by the server. Data are buffered according to the {@link #setBufferSize(int) bufferSize} property, and only flushed automatically when the buffer size is reached. Users should either manually {@link #flushMetricBuffer()} after writing a batch of data if that makes sense, or consider adding a {@link Scheduled Scheduled} task to flush periodically.
+
 ### How To Use
 
 
@@ -63,3 +65,17 @@ public class MySpringBootAppConfiguration {
 	....
 }
 ```
+### Metrics Application Properties
+
+| Property        | Default Value           | Description  |
+| ------------- |:-------------:| -----:|
+| spring.metrics.export.aggregate.key-pattern | | pattern that tells the aggregator what to do with the keys from the source repository |
+| spring.metrics.export.aggregate.prefix | | prefix for global repository if active |
+| spring.metrics.export.enabled | true | flag to disable all metric exports (assuming any MetricWriters are available) |
+| spring.metrics.export.delay-millis | 5000 | delay in milliseconds between export ticks |
+| spring.metrics.export.send-latest | true | flag to switch off any available optimizations based on not exporting unchanged metric values |
+| spring.metrics.export.includes | | list of patterns for metric names to include |
+| spring.metrics.export.excludes | | list of patterns for metric names to exclude. Applied after the includes |
+| spring.metrics.export.triggers.* | | specific trigger properties per MetricWriter bean name |
+
+
