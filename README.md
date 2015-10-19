@@ -52,8 +52,13 @@ public class MySpringBootAppConfiguration {
 	@Bean
 	@ExportMetricWriter
 	public MetricWriter metricExporter() {
-		return new AmbariMetricWriter("AmbariMetricCollectorHost", "AmbariMetricsCollectorPort", "AppID666", "hostName9", 50);
-		//return new LogMetricWriter();
+		return new AmbariMetricWriter(
+			"AmbariMetricCollectorHost",  // AMS host name
+			"AmbariMetricsCollectorPort", // AMS port number
+			"AppID666",                   // metric primary key
+			"hostName9",                  // metric secondary key
+			50                            // Buffer size
+		);
 	}
 	....
 }
