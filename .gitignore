@@ -8,7 +8,7 @@
 build
 
 # Maven build directories
-*/target
+/target
 
 /external-jars
 /Servers
