@@ -11,39 +11,33 @@ The `ambari-metric-writer` allows you to export (at real time) all application m
 ### How To Use
 
 
-1. Add the big-data maven repository to your pom:
+* Add the big-data maven repository to your pom:
 
 ```xml
-  <repositories>
-    <repository>
-      <id>bintray-big-data-maven</id>
-      <name>bintray</name>
-      <url>http://dl.bintray.com/big-data/maven</url>
-    </repository>
-    .......
-  </repositories>    
+    <repositories>
+      <repository>
+        <id>bintray-big-data-maven</id>
+        <name>bintray</name>
+        <url>http://dl.bintray.com/big-data/maven</url>
+      </repository>
+    </repositories>    
 ```
 
-2. Add `ambari-metric-writer` dependency:
+* Add the `ambari-metric-writer` and `spring-boot-starter-actuator` dependencies to your pom:
 
 ```xml
     <dependency>
       <groupId>org.springframework.boot.actuate.metrics</groupId>
       <artifactId>ambari-metric-writer</artifactId>
       <version>0.0.5</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
-``` 
-
-3. Enable the Actuator in your boot application pom.
-
-```xml
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
 ```
 
-4. If you provide a `@Bean` of type `AmbariMetricWriter` and mark it @ExportMetricWriter metrics are exported to Ambari Metric Collector. 
+* Provide a `@Bean` of type `AmbariMetricWriter` and mark it `@ExportMetricWriter` metrics are exported to Ambari Metric Collector. 
 
 ```java
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
@@ -51,7 +45,6 @@ import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 
 @Configuration
 public class MySpringBootAppConfiguration {
@@ -65,4 +58,3 @@ public class MySpringBootAppConfiguration {
 	....
 }
 ```
-
