@@ -67,8 +67,10 @@ public class MySpringBootAppConfiguration {
 ```
 ### Metrics Application Properties
 
+Various metrics properties can be specified inside your `application.properties`/`application.yml` file or as command line switches. This section provides a list common Spring Boot metric properties and references to the underlying classes that consume them.
+
 | Property        | Default Value           | Description  |
-| ------------- |:-------------:| -----:|
+| ------------- |:-------------:| -----|
 | spring.metrics.export.aggregate.key-pattern | | pattern that tells the aggregator what to do with the keys from the source repository |
 | spring.metrics.export.aggregate.prefix | | prefix for global repository if active |
 | spring.metrics.export.enabled | true | flag to disable all metric exports (assuming any MetricWriters are available) |
