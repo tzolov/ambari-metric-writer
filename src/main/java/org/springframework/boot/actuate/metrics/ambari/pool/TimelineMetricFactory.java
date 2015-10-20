@@ -25,24 +25,24 @@ import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetric;
 
 public class TimelineMetricFactory extends BasePooledObjectFactory<TimelineMetric> {
 
-	@Override
-	public TimelineMetric create() throws Exception {
-		return new TimelineMetric();
-	}
+    @Override
+    public TimelineMetric create() throws Exception {
+        return new TimelineMetric();
+    }
 
-	@Override
-	public PooledObject<TimelineMetric> wrap(TimelineMetric tm) {
-		return new DefaultPooledObject<TimelineMetric>(tm);
-	}
+    @Override
+    public PooledObject<TimelineMetric> wrap(TimelineMetric tm) {
+        return new DefaultPooledObject<TimelineMetric>(tm);
+    }
 
-	@Override
-	public void passivateObject(PooledObject<TimelineMetric> tm) throws Exception {
-		// When the TimelineMetric is returned to the pool, clean the previous state
-		tm.getObject().setInstanceId(null);
-		tm.getObject().setAppId(null);
-		tm.getObject().setHostName(null);
-		tm.getObject().setMetricName(null);
-		tm.getObject().setMetricValues(null);
-		tm.getObject().setStartTime(-1);
-	}
+    @Override
+    public void passivateObject(PooledObject<TimelineMetric> tm) throws Exception {
+        // When the TimelineMetric is returned to the pool, clean the previous state
+        tm.getObject().setInstanceId(null);
+        tm.getObject().setAppId(null);
+        tm.getObject().setHostName(null);
+        tm.getObject().setMetricName(null);
+        tm.getObject().setMetricValues(null);
+        tm.getObject().setStartTime(-1);
+    }
 }

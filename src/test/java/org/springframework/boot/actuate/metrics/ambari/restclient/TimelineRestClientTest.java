@@ -36,47 +36,47 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 public class TimelineRestClientTest {
 
-	private MockRestServiceServer mockServer;
-	private TimelineRestClient restClient;
+    private MockRestServiceServer mockServer;
+    private TimelineRestClient restClient;
 
-	@Before
-	public void before() {
-		String ambariMetricsCollectorHost = "localhost";
-		String ambariMetricsCollectorPort = "6188";
+    @Before
+    public void before() {
+        String ambariMetricsCollectorHost = "localhost";
+        String ambariMetricsCollectorPort = "6188";
 
-		restClient = new TimelineRestClient(ambariMetricsCollectorHost, ambariMetricsCollectorPort);
-		mockServer = MockRestServiceServer.createServer(restClient.getRestTemplate());
-	}
+        restClient = new TimelineRestClient(ambariMetricsCollectorHost, ambariMetricsCollectorPort);
+        mockServer = MockRestServiceServer.createServer(restClient.getRestTemplate());
+    }
 
-	@Test
-	public void testTimelineClient() {
+    @Test
+    public void testTimelineClient() {
 
-		mockServer
-				.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(
-						content()
-								.string("{\"metrics\":[{\"metricname\":\"Metric Name\",\"appid\":\"appid\",\"instanceid\":\"instance id\",\"hostname\":\"a host\",\"starttime\":696969,\"metrics\":{\"666666\":666.666,\"999999\":999.999}}]}"))
-				.andRespond(withSuccess());
+        mockServer
+                .expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(
+                        content()
+                                .string("{\"metrics\":[{\"metricname\":\"Metric Name\",\"appid\":\"appid\",\"instanceid\":\"instance id\",\"hostname\":\"a host\",\"starttime\":696969,\"metrics\":{\"666666\":666.666,\"999999\":999.999}}]}"))
+                .andRespond(withSuccess());
 
-		TimelineMetric tm = new TimelineMetric();
-		tm.setAppId("appid");
-		tm.setHostName("a host");
-		tm.setInstanceId("instance id");
-		tm.setMetricName("Metric Name");
-		tm.setStartTime(696969L);
-		Map<Long, Float> metricValues = new TreeMap<Long, Float>();
-		metricValues.put(666666L, 666.666f);
-		metricValues.put(999999L, 999.999f);
-		tm.setMetricValues(metricValues);
+        TimelineMetric tm = new TimelineMetric();
+        tm.setAppId("appid");
+        tm.setHostName("a host");
+        tm.setInstanceId("instance id");
+        tm.setMetricName("Metric Name");
+        tm.setStartTime(696969L);
+        Map<Long, Float> metricValues = new TreeMap<Long, Float>();
+        metricValues.put(666666L, 666.666f);
+        metricValues.put(999999L, 999.999f);
+        tm.setMetricValues(metricValues);
 
-		TimelineMetrics tms = new TimelineMetrics();
-		tms.setMetrics(Arrays.asList(tm));
+        TimelineMetrics tms = new TimelineMetrics();
+        tms.setMetrics(Arrays.asList(tm));
 
-		boolean successful = restClient.putMetrics(tms);
+        boolean successful = restClient.putMetrics(tms);
 
-		mockServer.verify();
+        mockServer.verify();
 
-		Assert.assertTrue(successful);
-	}
+        Assert.assertTrue(successful);
+    }
 }

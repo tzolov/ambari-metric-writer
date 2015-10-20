@@ -34,74 +34,74 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 public abstract class AbstractAmbariMetricWriterTest {
 
-	protected MockRestServiceServer mockServer;
-	protected AbstractAmbariMetricWriter ambariMetricWriter;
+    protected MockRestServiceServer mockServer;
+    protected AbstractAmbariMetricWriter ambariMetricWriter;
 
-	private Random random = new Random();
+    private Random random = new Random();
 
-	@Test
-	public void postSuccessfullyOnFlush() {
-		mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics")).andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
+    @Test
+    public void postSuccessfullyOnFlush() {
+        mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics")).andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
 
-		ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
+        ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
 
-		ambariMetricWriter.flushMetricBuffer();
+        ambariMetricWriter.flushMetricBuffer();
 
-		mockServer.verify();
-	}
+        mockServer.verify();
+    }
 
-	@Test
-	public void flushAutomaticlly() {
-		mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics")).andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
+    @Test
+    public void flushAutomaticlly() {
+        mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics")).andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
 
-		ambariMetricWriter.setBufferSize(0);
+        ambariMetricWriter.setBufferSize(0);
 
-		ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
+        ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
 
-		mockServer.verify();
+        mockServer.verify();
 
-		assertEquals(1, ambariMetricWriter.getTimelineMetricsPool().getBorrowedCount());
-		assertEquals(1, ambariMetricWriter.getTimelineMetricPool().getBorrowedCount());
+        assertEquals(1, ambariMetricWriter.getTimelineMetricsPool().getBorrowedCount());
+        assertEquals(1, ambariMetricWriter.getTimelineMetricPool().getBorrowedCount());
 
-		assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
-				.getNumActive());
-		assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
-				.getNumActive());
-	}
+        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
+                .getNumActive());
+        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
+                .getNumActive());
+    }
 
-	@Test
-	public void consecutiveAutomaticFlushes() {
+    @Test
+    public void consecutiveAutomaticFlushes() {
 
-		int bufferSize = 20;
+        int bufferSize = 20;
 
-		// Total number of new metrics set
-		long metricSetCount = 220;
+        // Total number of new metrics set
+        long metricSetCount = 220;
 
-		int expectedFlushCount = (int) metricSetCount / (bufferSize + 1);
+        int expectedFlushCount = (int) metricSetCount / (bufferSize + 1);
 
-		ambariMetricWriter.setBufferSize(bufferSize);
+        ambariMetricWriter.setBufferSize(bufferSize);
 
-		for (int c = 0; c < expectedFlushCount; c++) {
-			mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))
-					.andExpect(method(HttpMethod.POST))
-					.andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
-		}
+        for (int c = 0; c < expectedFlushCount; c++) {
+            mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))
+                    .andExpect(method(HttpMethod.POST))
+                    .andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
+        }
 
-		for (int b = 0; b < metricSetCount; b++) {
-			ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
-		}
+        for (int b = 0; b < metricSetCount; b++) {
+            ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
+        }
 
-		mockServer.verify();
+        mockServer.verify();
 
-		assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
-				.getNumActive());
-		assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
-				.getNumActive());
-	}
+        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
+                .getNumActive());
+        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
+                .getNumActive());
+    }
 
-	private static Metric<Number> metric(String name, long timestamp, float value) {
-		return new Metric<Number>(name, value, new Date(timestamp));
-	}
+    private static Metric<Number> metric(String name, long timestamp, float value) {
+        return new Metric<Number>(name, value, new Date(timestamp));
+    }
 }

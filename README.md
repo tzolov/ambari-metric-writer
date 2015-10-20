@@ -31,7 +31,7 @@ A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), wr
     <dependency>
       <groupId>org.springframework.boot.actuate.metrics</groupId>
       <artifactId>ambari-metric-writer</artifactId>
-      <version>0.0.6</version>
+      <version>0.0.7</version>
     </dependency>    
     
     <dependency>
@@ -102,6 +102,7 @@ In addition to the common properties following properties configure the Ambari M
 
 | Property        | Default Value           | Description  |
 | ------------- |:-------------:| -----|
+| spring.metrics.export.ambari.writer-type | sync  | `synch` (default) uses synchronous REST calls to send the metrics to the server. The `async` uses asynchronous REST calls to transmit the metrics and `dummy` prints the metrics to the log.  |
 | spring.metrics.export.ambari.enabled | true  | When set to false the ambari export is deactivated  |
 | spring.metrics.export.ambari.timeline-host |  | Host of a Ambari Timeline server to receive exported metrics |
 | spring.metrics.export.ambari.timeline-port | 6188 | Port of a Ambari Timeline server to receive exported metrics |

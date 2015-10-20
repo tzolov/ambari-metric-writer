@@ -29,49 +29,49 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
-	private static final Logger logger = LoggerFactory.getLogger(AsyncAmbariMetricWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncAmbariMetricWriter.class);
 
-	private AsyncTimelineRestClient timelineRestClient;
+    private AsyncTimelineRestClient timelineRestClient;
 
-	public AsyncAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-			String hostName, int metricsBufferSize) {
+    public AsyncAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
+            String hostName, int metricsBufferSize) {
 
-		super(applicationId, hostName, metricsBufferSize);
+        super(applicationId, hostName, metricsBufferSize);
 
-		this.timelineRestClient = new AsyncTimelineRestClient(metricsCollectorHost, metricsCollectorPort);
-	}
+        this.timelineRestClient = new AsyncTimelineRestClient(metricsCollectorHost, metricsCollectorPort);
+    }
 
-	@Override
-	protected void doSendMetrics(TimelineMetrics timelineMetrics) {
-		// REST call to send the metrics to the Ambari Timeline Server
-		timelineRestClient.putMetrics(timelineMetrics, new RestResponseListener(timelineMetrics));
-	}
+    @Override
+    protected void doSendMetrics(TimelineMetrics timelineMetrics) {
+        // REST call to send the metrics to the Ambari Timeline Server
+        timelineRestClient.putMetrics(timelineMetrics, new RestResponseListener(timelineMetrics));
+    }
 
-	@SuppressWarnings("rawtypes")
-	private class RestResponseListener implements ListenableFutureCallback<ResponseEntity<Map>> {
+    @SuppressWarnings("rawtypes")
+    private class RestResponseListener implements ListenableFutureCallback<ResponseEntity<Map>> {
 
-		private TimelineMetrics timelineMetrics;
+        private TimelineMetrics timelineMetrics;
 
-		public RestResponseListener(TimelineMetrics timelineMetrics) {
-			this.timelineMetrics = timelineMetrics;
-		}
+        public RestResponseListener(TimelineMetrics timelineMetrics) {
+            this.timelineMetrics = timelineMetrics;
+        }
 
-		@Override
-		public void onFailure(Throwable ex) {
-			logger.warn("Failed to send timeline metrics!", ex);
-			// Return the TimelineMetric objects to the pool
-			freePoolObjects(timelineMetrics);
-		}
+        @Override
+        public void onFailure(Throwable ex) {
+            logger.warn("Failed to send timeline metrics!", ex);
+            // Return the TimelineMetric objects to the pool
+            freePoolObjects(timelineMetrics);
+        }
 
-		@Override
-		public void onSuccess(ResponseEntity<Map> result) {
-			// Return the TimelineMetric objects to the pool
-			freePoolObjects(timelineMetrics);
-		}
-	}
+        @Override
+        public void onSuccess(ResponseEntity<Map> result) {
+            // Return the TimelineMetric objects to the pool
+            freePoolObjects(timelineMetrics);
+        }
+    }
 
-	// Test purpose only
-	public AsyncTimelineRestClient getTimelineRestClient() {
-		return timelineRestClient;
-	}
+    // Test purpose only
+    public AsyncTimelineRestClient getTimelineRestClient() {
+        return timelineRestClient;
+    }
 }

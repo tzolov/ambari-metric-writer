@@ -25,33 +25,33 @@ import org.springframework.boot.actuate.metrics.ambari.restclient.TimelineRestCl
 
 public class AmbariMetricWriter extends AbstractAmbariMetricWriter {
 
-	private static final Logger logger = LoggerFactory.getLogger(AmbariMetricWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AmbariMetricWriter.class);
 
-	private TimelineRestClient timelineRestClient;
+    private TimelineRestClient timelineRestClient;
 
-	public AmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-			String hostName, int metricsBufferSize) {
+    public AmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
+            String hostName, int metricsBufferSize) {
 
-		super(applicationId, hostName, metricsBufferSize);
+        super(applicationId, hostName, metricsBufferSize);
 
-		this.timelineRestClient = new TimelineRestClient(metricsCollectorHost, metricsCollectorPort);
-	}
+        this.timelineRestClient = new TimelineRestClient(metricsCollectorHost, metricsCollectorPort);
+    }
 
-	@Override
-	protected void doSendMetrics(TimelineMetrics timelineMetrics) {
+    @Override
+    protected void doSendMetrics(TimelineMetrics timelineMetrics) {
 
-		logger.debug("Send metrics");
+        logger.debug("Send metrics");
 
-		// REST call to send the metrics to the Ambari Timeline Server
-		timelineRestClient.putMetrics(timelineMetrics);
+        // REST call to send the metrics to the Ambari Timeline Server
+        timelineRestClient.putMetrics(timelineMetrics);
 
-		// Return the TimelineMetric objects to the pool
-		freePoolObjects(timelineMetrics);
-	}
+        // Return the TimelineMetric objects to the pool
+        freePoolObjects(timelineMetrics);
+    }
 
-	// Test purpose only
-	public TimelineRestClient getTimelineRestClient() {
-		return timelineRestClient;
-	}
+    // Test purpose only
+    public TimelineRestClient getTimelineRestClient() {
+        return timelineRestClient;
+    }
 
 }

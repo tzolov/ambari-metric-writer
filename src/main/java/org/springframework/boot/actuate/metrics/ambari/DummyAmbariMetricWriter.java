@@ -32,38 +32,38 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
-	private static final Logger logger = LoggerFactory.getLogger(DummyAmbariMetricWriter.class);
-	private ObjectMapper objectMapper;
+    private static final Logger logger = LoggerFactory.getLogger(DummyAmbariMetricWriter.class);
+    private ObjectMapper objectMapper;
 
-	public DummyAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-			String hostName, int metricsBufferSize) {
-		
-		super(applicationId, hostName, metricsBufferSize);
+    public DummyAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
+            String hostName, int metricsBufferSize) {
 
-		JaxbAnnotationModule module = new JaxbAnnotationModule();
-		objectMapper = new ObjectMapper();
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-		objectMapper.registerModule(module);
-	}
-	
-	@Override
-	public void set(Metric<?> metric) {
-//		logger.info("Metric Count: " + getBufferedMetricCount().get());
-		super.set(metric);
-	}
-	
-	@Override
-	protected void doSendMetrics(TimelineMetrics timelineMetrics) {
+        super(applicationId, hostName, metricsBufferSize);
 
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			objectMapper.writeValue(out, timelineMetrics);
-			
-			logger.info("Send New Metrics: \n" + out.toString());
-			
-			freePoolObjects(timelineMetrics);
-		} catch (IOException e) {
-			logger.error("", e);
-		}
-	}
+        JaxbAnnotationModule module = new JaxbAnnotationModule();
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.registerModule(module);
+    }
+
+    @Override
+    public void set(Metric<?> metric) {
+        // logger.info("Metric Count: " + getBufferedMetricCount().get());
+        super.set(metric);
+    }
+
+    @Override
+    protected void doSendMetrics(TimelineMetrics timelineMetrics) {
+
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            objectMapper.writeValue(out, timelineMetrics);
+
+            logger.info("Send New Metrics: \n" + out.toString());
+
+            freePoolObjects(timelineMetrics);
+        } catch (IOException e) {
+            logger.error("", e);
+        }
+    }
 }

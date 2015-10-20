@@ -26,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -35,54 +36,59 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 public class AsyncTimelineRestClient {
 
-	private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{ambari-metrics-collector}:{port}/ws/v1/timeline/metrics";
+    private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{ambari-metrics-collector}:{port}/ws/v1/timeline/metrics";
 
-	private String ambariMetricsCollectorHost = "localhost";
+    private String ambariMetricsCollectorHost = "localhost";
 
-	private String ambariMetricsCollectorPort = "6188";
+    private String ambariMetricsCollectorPort = "6188";
 
-	/**
-	 * The media type to use to serialize and accept responses from the server. Defaults to "application/json".
-	 */
-	private MediaType mediaType = MediaType.APPLICATION_JSON;
+    /**
+     * The media type to use to serialize and accept responses from the server. Defaults to "application/json".
+     */
+    private MediaType mediaType = MediaType.APPLICATION_JSON;
 
-	private AsyncRestTemplate restTemplate = null;
+    private AsyncRestTemplate restTemplate = null;
 
-	public AsyncTimelineRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
-		this.ambariMetricsCollectorHost = ambariMetricsCollectorHost;
-		this.ambariMetricsCollectorPort = ambariMetricsCollectorPort;
-		this.restTemplate = createTimelineClient();
-	}
+    public AsyncTimelineRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
+        this.ambariMetricsCollectorHost = ambariMetricsCollectorHost;
+        this.ambariMetricsCollectorPort = ambariMetricsCollectorPort;
+        this.restTemplate = createTimelineClient();
+    }
 
-	@SuppressWarnings("rawtypes")
-	public void putMetrics(TimelineMetrics metrics, ListenableFutureCallback<ResponseEntity<Map>> callback) {
+    @SuppressWarnings("rawtypes")
+    public void putMetrics(TimelineMetrics metrics, ListenableFutureCallback<ResponseEntity<Map>> callback) {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(this.mediaType));
-		headers.setContentType(this.mediaType);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(this.mediaType));
+        headers.setContentType(this.mediaType);
 
-		ListenableFuture<ResponseEntity<Map>> asyncResponse = restTemplate.postForEntity(AMBARI_METRICS_COLLECTOR_URL,
-				new HttpEntity<TimelineMetrics>(metrics, headers), Map.class, ambariMetricsCollectorHost,
-				ambariMetricsCollectorPort);
+        ListenableFuture<ResponseEntity<Map>> asyncResponse = restTemplate.postForEntity(AMBARI_METRICS_COLLECTOR_URL,
+                new HttpEntity<TimelineMetrics>(metrics, headers), Map.class, ambariMetricsCollectorHost,
+                ambariMetricsCollectorPort);
 
-		asyncResponse.addCallback(callback);
-	}
+        asyncResponse.addCallback(callback);
+    }
 
-	private AsyncRestTemplate createTimelineClient() {
+    private AsyncRestTemplate createTimelineClient() {
 
-		MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
-		JaxbAnnotationModule module = new JaxbAnnotationModule();
-		mc.getObjectMapper().registerModule(module);
+        MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
+        JaxbAnnotationModule module = new JaxbAnnotationModule();
+        mc.getObjectMapper().registerModule(module);
 
-		AsyncRestTemplate restTemplate = new AsyncRestTemplate();
-		restTemplate.getMessageConverters().clear();
-		restTemplate.getMessageConverters().add(mc);
+        AsyncRestTemplate restTemplate = new AsyncRestTemplate();
+        restTemplate.getMessageConverters().clear();
+        restTemplate.getMessageConverters().add(mc);
 
-		return restTemplate;
-	}
+        SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) restTemplate
+                .getAsyncRequestFactory();
+        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout(5000);
 
-	// test only
-	public AsyncRestTemplate getRestTemplate() {
-		return restTemplate;
-	}
+        return restTemplate;
+    }
+
+    // test only
+    public AsyncRestTemplate getRestTemplate() {
+        return restTemplate;
+    }
 }

@@ -26,52 +26,52 @@ import org.springframework.util.Assert;
 
 public class TimelineMetricFactoryTest {
 
-	private TimelineMetricFactory timelineMetricFactory;
+    private TimelineMetricFactory timelineMetricFactory;
 
-	@Before
-	public void before() {
-		timelineMetricFactory = new TimelineMetricFactory();
-	}
+    @Before
+    public void before() {
+        timelineMetricFactory = new TimelineMetricFactory();
+    }
 
-	@Test
-	public void testCreate() throws Exception {
-		TimelineMetric metric = timelineMetricFactory.create();
+    @Test
+    public void testCreate() throws Exception {
+        TimelineMetric metric = timelineMetricFactory.create();
 
-		Assert.notNull(metric);
-		Assert.isNull(metric.getAppId());
-		Assert.isNull(metric.getHostName());
-		Assert.isNull(metric.getInstanceId());
-		Assert.isTrue(metric.getStartTime() == 0);
-		Assert.isNull(metric.getMetricName());
-		Assert.isNull(metric.getMetricValues());
-	}
+        Assert.notNull(metric);
+        Assert.isNull(metric.getAppId());
+        Assert.isNull(metric.getHostName());
+        Assert.isNull(metric.getInstanceId());
+        Assert.isTrue(metric.getStartTime() == 0);
+        Assert.isNull(metric.getMetricName());
+        Assert.isNull(metric.getMetricValues());
+    }
 
-	@Test
-	public void testPassivateObject() throws Exception {
-		TimelineMetric metric = timelineMetricFactory.create();
+    @Test
+    public void testPassivateObject() throws Exception {
+        TimelineMetric metric = timelineMetricFactory.create();
 
-		metric.setAppId("appId");
-		metric.setHostName("hostName");
-		metric.setInstanceId("instanceId");
-		metric.setStartTime(666666);
-		metric.setMetricName("MetricName");
-		metric.setMetricValues(new HashMap<Long, Float>());
+        metric.setAppId("appId");
+        metric.setHostName("hostName");
+        metric.setInstanceId("instanceId");
+        metric.setStartTime(666666);
+        metric.setMetricName("MetricName");
+        metric.setMetricValues(new HashMap<Long, Float>());
 
-		Assert.notNull(metric);
-		Assert.notNull(metric.getAppId());
-		Assert.notNull(metric.getHostName());
-		Assert.notNull(metric.getInstanceId());
-		Assert.isTrue(metric.getStartTime() > 0);
-		Assert.notNull(metric.getMetricName());
-		Assert.notNull(metric.getMetricValues());
+        Assert.notNull(metric);
+        Assert.notNull(metric.getAppId());
+        Assert.notNull(metric.getHostName());
+        Assert.notNull(metric.getInstanceId());
+        Assert.isTrue(metric.getStartTime() > 0);
+        Assert.notNull(metric.getMetricName());
+        Assert.notNull(metric.getMetricValues());
 
-		timelineMetricFactory.passivateObject(timelineMetricFactory.wrap(metric));
+        timelineMetricFactory.passivateObject(timelineMetricFactory.wrap(metric));
 
-		Assert.isNull(metric.getAppId());
-		Assert.isNull(metric.getHostName());
-		Assert.isNull(metric.getInstanceId());
-		Assert.isTrue(metric.getStartTime() < 0);
-		Assert.isNull(metric.getMetricName());
-		Assert.isNull(metric.getMetricValues());
-	}
+        Assert.isNull(metric.getAppId());
+        Assert.isNull(metric.getHostName());
+        Assert.isNull(metric.getInstanceId());
+        Assert.isTrue(metric.getStartTime() < 0);
+        Assert.isNull(metric.getMetricName());
+        Assert.isNull(metric.getMetricValues());
+    }
 }

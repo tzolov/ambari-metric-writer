@@ -7,82 +7,102 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("spring.metrics.export.ambari")
 public class AmbariMetricProperties {
 
-	/**
-	 * Host of a Ambari Timeline server to receive exported metrics.
-	 */
-	private String timelineHost;
+    /**
+     * Host of a Ambari Timeline server to receive exported metrics.
+     */
+    private String timelineHost;
 
-	/**
-	 * Port of a Ambari Timeline server to receive exported metrics.
-	 */
-	private int timelinePort = 6188;
+    /**
+     * Port of a Ambari Timeline server to receive exported metrics.
+     */
+    private int timelinePort = 6188;
 
-	/**
-	 * Uniquely identify service/application within Ambari.
-	 */
-	private String applicationId;
+    /**
+     * Uniquely identify service/application within Ambari.
+     */
+    private String applicationId;
 
-	/**
-	 * Used as second key part when storing metrics in the Timeline server.
-	 */
-	private String hostName;
+    /**
+     * Used as second key part when storing metrics in the Timeline server.
+     */
+    private String hostName;
 
-	/**
+    /**
 	 * 
 	 */
-	private String instanceId = "nil";
+    private String instanceId = "nil";
 
-	/**
-	 * Metric buffer size to fill before posting data to server.
-	 */
-	private int metricsBufferSize = 100;
+    /**
+     * Metric buffer size to fill before posting data to server.
+     */
+    private int metricsBufferSize = 100;
 
+    /**
+     * Ambari Metric Writer implementation. Accepted values are:
+     * <ul>
+     * <li>sync (AmbariMetricWriter)</li>
+     * <li>async (AsyncAmbariMetricWriter)</li> and
+     * <li>dummy (DummyAmbariMetricWriter)</li>
+     * 
+     * <br/>
+     * The default type is <bold>sync</bold>.
+     * </ul>
+     */
+    private String writerType = "sync";
 
-	public String getTimelineHost() {
-		return timelineHost;
-	}
+    public String getWriterType() {
+        return writerType;
+    }
 
-	public void setTimelineHost(String timelineHost) {
-		this.timelineHost = timelineHost;
-	}
+    public void setWriterType(String writerType) {
+        this.writerType = writerType;
+    }
 
-	public int getTimelinePort() {
-		return timelinePort;
-	}
+    public String getTimelineHost() {
+        return timelineHost;
+    }
 
-	public void setTimelinePort(int timelinePort) {
-		this.timelinePort = timelinePort;
-	}
+    public void setTimelineHost(String timelineHost) {
+        this.timelineHost = timelineHost;
+    }
 
-	public String getApplicationId() {
-		return applicationId;
-	}
+    public int getTimelinePort() {
+        return timelinePort;
+    }
 
-	public void setApplicationId(String applicationId) {
-		this.applicationId = applicationId;
-	}
+    public void setTimelinePort(int timelinePort) {
+        this.timelinePort = timelinePort;
+    }
 
-	public String getHostName() {
-		return hostName;
-	}
+    public String getApplicationId() {
+        return applicationId;
+    }
 
-	public void setHostName(String hostName) {
-		this.hostName = hostName;
-	}
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 
-	public String getInstanceId() {
-		return instanceId;
-	}
+    public String getHostName() {
+        return hostName;
+    }
 
-	public void setInstanceId(String instanceId) {
-		this.instanceId = instanceId;
-	}
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
 
-	public int getMetricsBufferSize() {
-		return metricsBufferSize;
-	}
+    public String getInstanceId() {
+        return instanceId;
+    }
 
-	public void setMetricsBufferSize(int metricsBufferSize) {
-		this.metricsBufferSize = metricsBufferSize;
-	}
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public int getMetricsBufferSize() {
+        return metricsBufferSize;
+    }
+
+    public void setMetricsBufferSize(int metricsBufferSize) {
+        this.metricsBufferSize = metricsBufferSize;
+    }
 }

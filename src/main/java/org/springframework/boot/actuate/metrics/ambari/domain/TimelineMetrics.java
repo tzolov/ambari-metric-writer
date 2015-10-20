@@ -32,20 +32,21 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.NONE)
 public class TimelineMetrics {
 
-  private List<TimelineMetric> allMetrics = new ArrayList<TimelineMetric>();
+    private List<TimelineMetric> allMetrics = new ArrayList<TimelineMetric>();
 
-  public TimelineMetrics() {}
+    public TimelineMetrics() {
+    }
 
-  @XmlElement(name = "metrics")
-  public List<TimelineMetric> getMetrics() {
-    return allMetrics;
-  }
+    @XmlElement(name = "metrics")
+    public List<TimelineMetric> getMetrics() {
+        return allMetrics;
+    }
 
-  public void setMetrics(List<TimelineMetric> allMetrics) {
-    this.allMetrics = allMetrics;
-  }
+    public void setMetrics(List<TimelineMetric> allMetrics) {
+        this.allMetrics = allMetrics;
+    }
 
-  public void addMetrics(List<TimelineMetric> metrics) {
-    this.allMetrics.addAll(metrics);
-  }
+    public void addMetrics(List<TimelineMetric> metrics) {
+        this.allMetrics.addAll(metrics);
+    }
 }

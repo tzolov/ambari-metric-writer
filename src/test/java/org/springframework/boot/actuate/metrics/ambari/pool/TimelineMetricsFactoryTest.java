@@ -25,36 +25,36 @@ import org.springframework.util.Assert;
 
 public class TimelineMetricsFactoryTest {
 
-	private TimelineMetricsFactory timelineMetricsFactory;
+    private TimelineMetricsFactory timelineMetricsFactory;
 
-	@Before
-	public void before() {
-		timelineMetricsFactory = new TimelineMetricsFactory();
-	}
+    @Before
+    public void before() {
+        timelineMetricsFactory = new TimelineMetricsFactory();
+    }
 
-	@Test
-	public void testCreate() throws Exception {
-		TimelineMetrics metrics = timelineMetricsFactory.create();
+    @Test
+    public void testCreate() throws Exception {
+        TimelineMetrics metrics = timelineMetricsFactory.create();
 
-		Assert.notNull(metrics);
-		Assert.notNull(metrics.getMetrics());
-		Assert.isTrue(metrics.getMetrics().size() == 0);
-	}
+        Assert.notNull(metrics);
+        Assert.notNull(metrics.getMetrics());
+        Assert.isTrue(metrics.getMetrics().size() == 0);
+    }
 
-	@Test
-	public void testPassivateObject() throws Exception {
-		TimelineMetrics metrics = timelineMetricsFactory.create();
+    @Test
+    public void testPassivateObject() throws Exception {
+        TimelineMetrics metrics = timelineMetricsFactory.create();
 
-		metrics.getMetrics().add(new TimelineMetric());
-		metrics.getMetrics().add(new TimelineMetric());
-		metrics.getMetrics().add(new TimelineMetric());
+        metrics.getMetrics().add(new TimelineMetric());
+        metrics.getMetrics().add(new TimelineMetric());
+        metrics.getMetrics().add(new TimelineMetric());
 
-		Assert.notNull(metrics);
-		Assert.isTrue(metrics.getMetrics().size() == 3);
+        Assert.notNull(metrics);
+        Assert.isTrue(metrics.getMetrics().size() == 3);
 
-		timelineMetricsFactory.passivateObject(timelineMetricsFactory.wrap(metrics));
+        timelineMetricsFactory.passivateObject(timelineMetricsFactory.wrap(metrics));
 
-		Assert.notNull(metrics);
-		Assert.isTrue(metrics.getMetrics().size() == 0);
-	}
+        Assert.notNull(metrics);
+        Assert.isTrue(metrics.getMetrics().size() == 0);
+    }
 }

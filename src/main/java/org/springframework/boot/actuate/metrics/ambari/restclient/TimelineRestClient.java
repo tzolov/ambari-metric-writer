@@ -28,6 +28,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,60 +36,65 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 public class TimelineRestClient {
 
-	private static final Logger logger = LoggerFactory.getLogger(TimelineRestClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimelineRestClient.class);
 
-	private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{ambari-metrics-collector}:{port}/ws/v1/timeline/metrics";
+    private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{ambari-metrics-collector}:{port}/ws/v1/timeline/metrics";
 
-	private String ambariMetricsCollectorHost = "localhost";
+    private String ambariMetricsCollectorHost = "localhost";
 
-	private String ambariMetricsCollectorPort = "6188";
+    private String ambariMetricsCollectorPort = "6188";
 
-	/**
-	 * The media type to use to serialize and accept responses from the server. Defaults to "application/json".
-	 */
-	private MediaType mediaType = MediaType.APPLICATION_JSON;
+    /**
+     * The media type to use to serialize and accept responses from the server. Defaults to "application/json".
+     */
+    private MediaType mediaType = MediaType.APPLICATION_JSON;
 
-	private RestTemplate restTemplate = null;
+    private RestTemplate restTemplate = null;
 
-	public TimelineRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
-		this.ambariMetricsCollectorHost = ambariMetricsCollectorHost;
-		this.ambariMetricsCollectorPort = ambariMetricsCollectorPort;
-		this.restTemplate = createTimelineClient();
-	}
+    public TimelineRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
+        this.ambariMetricsCollectorHost = ambariMetricsCollectorHost;
+        this.ambariMetricsCollectorPort = ambariMetricsCollectorPort;
+        this.restTemplate = createTimelineClient();
+    }
 
-	@SuppressWarnings("rawtypes")
-	public boolean putMetrics(TimelineMetrics metrics) {
+    @SuppressWarnings("rawtypes")
+    public boolean putMetrics(TimelineMetrics metrics) {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(this.mediaType));
-		headers.setContentType(this.mediaType);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(this.mediaType));
+        headers.setContentType(this.mediaType);
 
-		ResponseEntity<Map> response = restTemplate.postForEntity(AMBARI_METRICS_COLLECTOR_URL,
-				new HttpEntity<TimelineMetrics>(metrics, headers), Map.class, ambariMetricsCollectorHost,
-				ambariMetricsCollectorPort);
+        ResponseEntity<Map> response = restTemplate.postForEntity(AMBARI_METRICS_COLLECTOR_URL,
+                new HttpEntity<TimelineMetrics>(metrics, headers), Map.class, ambariMetricsCollectorHost,
+                ambariMetricsCollectorPort);
 
-		if (!response.getStatusCode().is2xxSuccessful()) {
-			logger.warn("Cannot write metrics " + metrics + " values): " + response.getBody());
-		}
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Cannot write metrics " + metrics + " values): " + response.getBody());
+        }
 
-		return response.getStatusCode().is2xxSuccessful();
-	}
+        return response.getStatusCode().is2xxSuccessful();
+    }
 
-	private RestTemplate createTimelineClient() {
+    private RestTemplate createTimelineClient() {
 
-		MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
-		JaxbAnnotationModule module = new JaxbAnnotationModule();
-		mc.getObjectMapper().registerModule(module);
+        MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
+        JaxbAnnotationModule module = new JaxbAnnotationModule();
+        mc.getObjectMapper().registerModule(module);
 
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getMessageConverters().clear();
-		restTemplate.getMessageConverters().add(mc);
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().clear();
+        restTemplate.getMessageConverters().add(mc);
 
-		return restTemplate;
-	}
+        SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) restTemplate
+                .getRequestFactory();
+        requestFactory.setReadTimeout(2000);
+        requestFactory.setConnectTimeout(2000);
 
-	// test only
-	public RestTemplate getRestTemplate() {
-		return restTemplate;
-	}
+        return restTemplate;
+    }
+
+    // test only
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
 }

@@ -22,19 +22,19 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 public class AmbariMetricWriterTest extends AbstractAmbariMetricWriterTest {
 
-	private int metricsBufferSize = 10;
-	private String ambariMetricsCollectorHost = "localhost";
-	private String ambariMetricsCollectorPort = "6188";
-	private String applicationId = "applicationId";
-	private String hostName = "hostName";
+    private int metricsBufferSize = 10;
+    private String ambariMetricsCollectorHost = "localhost";
+    private String ambariMetricsCollectorPort = "6188";
+    private String applicationId = "applicationId";
+    private String hostName = "hostName";
 
-	@Before
-	public void before() {
-		
-		ambariMetricWriter = new AmbariMetricWriter(ambariMetricsCollectorHost, ambariMetricsCollectorPort,
-				applicationId, hostName, metricsBufferSize);
-		
-		mockServer = MockRestServiceServer.createServer(((AmbariMetricWriter) ambariMetricWriter)
-				.getTimelineRestClient().getRestTemplate());
-	}
+    @Before
+    public void before() {
+
+        ambariMetricWriter = new AmbariMetricWriter(ambariMetricsCollectorHost, ambariMetricsCollectorPort,
+                applicationId, hostName, metricsBufferSize);
+
+        mockServer = MockRestServiceServer.createServer(((AmbariMetricWriter) ambariMetricWriter)
+                .getTimelineRestClient().getRestTemplate());
+    }
 }
