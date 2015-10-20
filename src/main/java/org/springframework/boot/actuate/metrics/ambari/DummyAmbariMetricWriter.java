@@ -37,7 +37,8 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
 	public DummyAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
 			String hostName, int metricsBufferSize) {
-		super(metricsCollectorHost, metricsCollectorPort, applicationId, hostName, metricsBufferSize);
+		
+		super(applicationId, hostName, metricsBufferSize);
 
 		JaxbAnnotationModule module = new JaxbAnnotationModule();
 		objectMapper = new ObjectMapper();
@@ -57,8 +58,10 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			objectMapper.writeValue(out, timelineMetrics);
-
+			
 			logger.info("Send New Metrics: \n" + out.toString());
+			
+			freePoolObjects(timelineMetrics);
 		} catch (IOException e) {
 			logger.error("", e);
 		}

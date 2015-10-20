@@ -18,7 +18,6 @@
 
 package org.springframework.boot.actuate.metrics.ambari;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
@@ -33,7 +32,7 @@ public class AmbariMetricWriter extends AbstractAmbariMetricWriter {
 	public AmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
 			String hostName, int metricsBufferSize) {
 
-		super(metricsCollectorHost, metricsCollectorPort, applicationId, hostName, metricsBufferSize);
+		super(applicationId, hostName, metricsBufferSize);
 
 		this.timelineRestClient = new TimelineRestClient(metricsCollectorHost, metricsCollectorPort);
 	}

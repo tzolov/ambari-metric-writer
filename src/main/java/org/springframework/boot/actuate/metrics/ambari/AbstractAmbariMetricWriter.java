@@ -21,8 +21,6 @@ package org.springframework.boot.actuate.metrics.ambari;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import it.unimi.dsi.fastutil.longs.Long2FloatArrayMap;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -60,7 +58,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author christian.tzolov@gmail.com
  *
  */
-public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closeable {
+public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Closeable */{
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractAmbariMetricWriter.class);
 
@@ -77,10 +75,18 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 	private String hostName;
 
 	/**
+	 * Instance id (optional).
+	 */
+	private String instanceId = "nil";
+
+	/**
 	 * Lock used to synchronize the writing of new metrics and their transition to the server.
 	 */
 	private ReentrantLock bufferLock;
 
+	/**
+	 * Metric buffer to fill before posting data to server.
+	 */
 	private Map<String, Map<Long, Float>> metricBuffer;
 
 	/**
@@ -89,7 +95,7 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 	private AtomicLong bufferedMetricCount;
 
 	/**
-	 * metric buffer size to fill before posting data to server.
+	 * Metric buffer size to fill before posting data to server.
 	 */
 	private int bufferSize;
 
@@ -97,17 +103,17 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 	 * Object pools used for TimelineMetric and TimelineMetrics objects.
 	 */
 	private GenericObjectPool<TimelineMetrics> timelineMetricsPool;
+
 	private GenericObjectPool<TimelineMetric> timelineMetricPool;
 
-	public AbstractAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-			String hostName, int metricsBufferSize) {
+	public AbstractAmbariMetricWriter(String applicationId, String hostName, int metricsBufferSize) {
 
 		this.applicationId = applicationId;
 		this.hostName = hostName;
 		this.bufferSize = metricsBufferSize;
 
 		this.timelineMetricPool = new GenericObjectPool<TimelineMetric>(new TimelineMetricFactory());
-		this.timelineMetricPool.setMaxTotal(bufferSize * 10);
+		this.timelineMetricPool.setMaxTotal(Math.max(1000, bufferSize * 10));
 		this.timelineMetricPool.setMaxWaitMillis(FIVE_SECONDS);
 
 		this.timelineMetricsPool = new GenericObjectPool<TimelineMetrics>(new TimelineMetricsFactory());
@@ -236,9 +242,9 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 						metric.setMetricName(metricName);
 						metric.setAppId(applicationId);
 						metric.setHostName(hostName);
+						metric.setInstanceId(instanceId);
 						metric.setMetricValues(metricValues);
 						metric.setStartTime(System.currentTimeMillis());
-						metric.setInstanceId("nil");
 
 						// Add metric to the list of metrics to send
 						timelineMetrics.getMetrics().add(metric);
@@ -296,26 +302,26 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 		this.timelineMetricsPool.returnObject(timelineMetrics);
 	}
 
-	@Override
-	public void close() throws IOException {
-
-		try {
-			if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
-				try {
-					metricBuffer.clear();
-
-					timelineMetricPool.clear();
-					timelineMetricPool.close();
-					timelineMetricsPool.clear();
-					timelineMetricsPool.close();
-				} finally {
-					bufferLock.unlock();
-				}
-			}
-		} catch (InterruptedException e) {
-			logger.warn("", e);
-		}
-	}
+	// @Override
+	// public void close() throws IOException {
+	//
+	// try {
+	// if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
+	// try {
+	// metricBuffer.clear();
+	//
+	// timelineMetricPool.clear();
+	// timelineMetricPool.close();
+	// timelineMetricsPool.clear();
+	// timelineMetricsPool.close();
+	// } finally {
+	// bufferLock.unlock();
+	// }
+	// }
+	// } catch (InterruptedException e) {
+	// logger.warn("", e);
+	// }
+	// }
 
 	public String getApplicationId() {
 		return applicationId;
@@ -331,6 +337,14 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter, Closea
 
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
+	}
+
+	public String getInstanceId() {
+		return instanceId;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
 	}
 
 	public long getBufferedMetricCount() {

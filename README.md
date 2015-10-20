@@ -31,15 +31,31 @@ A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), wr
     <dependency>
       <groupId>org.springframework.boot.actuate.metrics</groupId>
       <artifactId>ambari-metric-writer</artifactId>
-      <version>0.0.5</version>
+      <version>0.0.6</version>
     </dependency>    
+    
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 ```
 
-* Provide a `@Bean` of type `AmbariMetricWriter` and mark it `@ExportMetricWriter` metrics are exported to Ambari Metric Collector. 
+* Add the `org.springframework.boot.actuate.metrics.ambari` component scan path (e.g. `scanBasePackages` attribute of the `@SpringBootApplication` annotation. Set the `spring.metrics.export.ambari.timeline-host` property via the application.properties or the command line.
+
+```java
+
+@SpringBootApplication(scanBasePackages = { 
+        "your.application.root.package",
+		"org.springframework.boot.actuate.metrics.ambari" })
+public class YourSpringBootApplication {
+	public static void main(String[] args) {
+		SpringApplication app = new SpringApplication(YourSpringBootApplication.class);
+		app.run(args);
+	}
+}
+```
+
+* Alternatively provide a `@Bean` of type `AmbariMetricWriter` and mark it `@ExportMetricWriter` metrics are exported to Ambari Metric Collector. 
 
 ```java
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
@@ -67,7 +83,9 @@ public class MySpringBootAppConfiguration {
 ```
 ### Metrics Application Properties
 
-Various metrics properties can be specified inside your `application.properties`/`application.yml` file or as command line switches. This section provides a list common Spring Boot metric properties and references to the underlying classes that consume them.
+Various metrics properties can be specified inside your `application.properties`/`application.yml` file or as command line switches. 
+
+Following section provides a list common Spring Boot metric properties:
 
 | Property        | Default Value           | Description  |
 | ------------- |:-------------:| -----|
@@ -80,4 +98,15 @@ Various metrics properties can be specified inside your `application.properties`
 | spring.metrics.export.excludes | | list of patterns for metric names to exclude. Applied after the includes |
 | spring.metrics.export.triggers.* | | specific trigger properties per MetricWriter bean name |
 
+In addition to the common properties following properties configure the Ambari Metric Export:
+
+| Property        | Default Value           | Description  |
+| ------------- |:-------------:| -----|
+| spring.metrics.export.ambari.enabled | true  | When set to false the ambari export is deactivated  |
+| spring.metrics.export.ambari.timeline-host |  | Host of a Ambari Timeline server to receive exported metrics |
+| spring.metrics.export.ambari.timeline-port | 6188 | Port of a Ambari Timeline server to receive exported metrics |
+| spring.metrics.export.ambari.application-id |  | Uniquely identify service/application within Ambari |
+| spring.metrics.export.ambari.host-name |  |  |
+| spring.metrics.export.ambari.instance-id | "nil"  |  |
+| spring.metrics.export.ambari.metrics-buffer-size | 100 | Metric buffer size to fill before posting data to server |
 
