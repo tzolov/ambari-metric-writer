@@ -1,14 +1,12 @@
 # Spring Boot to Apache Ambari Metric Writer
 
 ### Overview
+The `ambari-metric-writer` allows you to export (at real time) all Spring [application metrics] (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) to [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
 
-[Spring Boot Actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready) includes a [Metrics Service](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics). Later provides a [PublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/PublicMetrics.java) interface that you can implement to expose metrics that you cannot record via one of those two mechanisms. Look at [SystemPublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/SystemPublicMetrics.java) for an example. Metrics for all HTTP requests are automatically recorded and expoed through the `metrics` endpoint. 
+A Spring Boot `MetricWriter` for the Apache [Ambari Metric System](https://cwiki.apache.org/confluence/display/AMBARI/Metrics), writing metrics to the [HTTP endpoint](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification) provided by the server. Data is buffered according to the `buffer-size` property, and flushed automatically when the buffer size is reached. Users should either manually `flushMetricBuffer()` or consider adding a `Scheduled` task to flush periodically.
 
-
-The `ambari-metric-writer` allows you to export (at real time) all application metrics to [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
-
-
-A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), writing metrics to the HTTP endpoint provided by the server. Data are buffered according to the {@link #setBufferSize(int) bufferSize} property, and only flushed automatically when the buffer size is reached. Users should either manually {@link #flushMetricBuffer()} after writing a batch of data if that makes sense, or consider adding a {@link Scheduled Scheduled} task to flush periodically.
+The [Spring Boot Actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready) includes a [Metrics Service](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) that automatically records all metrics and expoes them through the `metrics` endpoint. 
+The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/PublicMetrics.java) interface that you can implement to expose custom metrics (look at [SystemPublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/SystemPublicMetrics.java) for an example). 
 
 ### How To Use
 
