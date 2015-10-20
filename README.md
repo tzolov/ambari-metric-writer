@@ -1,4 +1,4 @@
-# Spring Boot to Apache Ambari Metric Writer
+# Spring Boot Metric Writer for Apache Ambari Metric System
 
 ### Overview
 The `ambari-metric-writer` allows you to export (at real time) all Spring [application metrics] (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) to [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
