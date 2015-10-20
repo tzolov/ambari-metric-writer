@@ -40,13 +40,12 @@ A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), wr
     </dependency>
 ```
 
-* Add the `org.springframework.boot.actuate.metrics.ambari` component scan path (e.g. `scanBasePackages` attribute of the `@SpringBootApplication` annotation. Set the `spring.metrics.export.ambari.timeline-host` property via the application.properties or the command line.
+* Add `AmbariMetricWriter.class` to `@SpringBootApplication` scan path and set the `spring.metrics.export.ambari.timeline-host` property via the `application.properties` or the command line (`--spring.metrics.export.ambari.timeline-host=timelineServerHost`).
 
 ```java
+import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
 
-@SpringBootApplication(scanBasePackages = { 
-        "your.application.root.package",
-		"org.springframework.boot.actuate.metrics.ambari" })
+@SpringBootApplication(scanBasePackageClasses = { AmbariMetricWriter.class })
 public class YourSpringBootApplication {
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(YourSpringBootApplication.class);
