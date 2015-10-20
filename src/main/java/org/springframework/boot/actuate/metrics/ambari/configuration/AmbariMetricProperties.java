@@ -1,5 +1,6 @@
 package org.springframework.boot.actuate.metrics.ambari.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -18,19 +19,22 @@ public class AmbariMetricProperties {
     private int timelinePort = 6188;
 
     /**
-     * Uniquely identify service/application within Ambari.
+     * Uniquely identify service/application within Ambari Timeline Server.
      */
+    @Value("${spring.application.name:application}.${random.value:0000}")
     private String applicationId;
 
     /**
      * Used as second key part when storing metrics in the Timeline server.
      */
+    @Value("${server.address:hostname}")
     private String hostName;
 
     /**
-	 * 
-	 */
-    private String instanceId = "nil";
+     * Optional application instance id
+     */
+    @Value("${spring.application.index:${server.port:${PORT:null}}}")
+    private String instanceId;
 
     /**
      * Metric buffer size to fill before posting data to server.

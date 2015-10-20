@@ -41,16 +41,19 @@ public class AmbariMetricConfiguration {
         if (properties.getWriterType().trim().equalsIgnoreCase("sync")) {
 
             metricWriter = new AmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getMetricsBufferSize());
+                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
+                    properties.getMetricsBufferSize());
 
         } else if (properties.getWriterType().trim().equalsIgnoreCase("async")) {
 
             metricWriter = new AsyncAmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getMetricsBufferSize());
+                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
+                    properties.getMetricsBufferSize());
         } else {
 
             metricWriter = new DummyAmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getMetricsBufferSize());
+                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
+                    properties.getMetricsBufferSize());
         }
 
         return metricWriter;

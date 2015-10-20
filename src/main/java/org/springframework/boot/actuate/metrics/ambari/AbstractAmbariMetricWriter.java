@@ -80,6 +80,11 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
     private String instanceId = "nil";
 
     /**
+     * Ambari Metric start time is set to the writer creation time.
+     */
+    private long startTime;
+
+    /**
      * Lock used to synchronize the writing of new metrics and their transition to the server.
      */
     private ReentrantLock bufferLock;
@@ -106,10 +111,13 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
 
     private GenericObjectPool<TimelineMetric> timelineMetricPool;
 
-    public AbstractAmbariMetricWriter(String applicationId, String hostName, int metricsBufferSize) {
+    public AbstractAmbariMetricWriter(String applicationId, String hostName, String instanceId, int metricsBufferSize) {
 
         this.applicationId = applicationId;
         this.hostName = hostName;
+        this.instanceId = instanceId;
+        this.startTime = System.currentTimeMillis();
+
         this.bufferSize = metricsBufferSize;
 
         this.timelineMetricPool = new GenericObjectPool<TimelineMetric>(new TimelineMetricFactory());
@@ -231,7 +239,6 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
         }
 
         try {
-
             TimelineMetrics timelineMetrics = timelineMetricsPool.borrowObject();
 
             Iterator<String> metricNames = namedMetricsBuffer.keySet().iterator();
@@ -242,19 +249,17 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
                 Map<Long, Float> metricValues = namedMetricsBuffer.get(metricName);
                 if (!isEmpty(metricValues)) {
                     try {
-
                         TimelineMetric metric = timelineMetricPool.borrowObject();
 
                         metric.setMetricName(metricName);
                         metric.setAppId(applicationId);
                         metric.setHostName(hostName);
                         metric.setInstanceId(instanceId);
+                        metric.setStartTime(startTime);
                         metric.setMetricValues(metricValues);
-                        metric.setStartTime(System.currentTimeMillis());
 
                         // Add metric to the list of metrics to send
                         timelineMetrics.getMetrics().add(metric);
-
                     } catch (Exception e) {
                         logger.error("Failed to borrow TimelineMetric object for:" + metricName, e);
                     }
@@ -265,7 +270,7 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
             doSendMetrics(timelineMetrics);
 
         } catch (Exception e1) {
-            logger.error("Failed to borrow TimelineMetrics form the pool! Skip sending metrics!", e1);
+            logger.error("Failed to send TimelineMetrics!", e1);
         }
     }
 

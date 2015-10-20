@@ -103,8 +103,8 @@ In addition to the common properties following properties configure the Ambari M
 | spring.metrics.export.ambari.enabled | true  | When set to false the ambari export is deactivated  |
 | spring.metrics.export.ambari.timeline-host |  | Host of a Ambari Timeline server to receive exported metrics |
 | spring.metrics.export.ambari.timeline-port | 6188 | Port of a Ambari Timeline server to receive exported metrics |
-| spring.metrics.export.ambari.application-id |  | Uniquely identify service/application within Ambari |
-| spring.metrics.export.ambari.host-name |  |  |
-| spring.metrics.export.ambari.instance-id | "nil"  |  |
+| spring.metrics.export.ambari.application-id | application.<radom int> | Uniquely identify service/application within Ambari |
+| spring.metrics.export.ambari.host-name | <local IP>  | Secondary identifier |
+| spring.metrics.export.ambari.instance-id | null  | Application instance id. Required if multiple `application-id` are run in parallel |
 | spring.metrics.export.ambari.metrics-buffer-size | 100 | Metric buffer size to fill before posting data to server |
 

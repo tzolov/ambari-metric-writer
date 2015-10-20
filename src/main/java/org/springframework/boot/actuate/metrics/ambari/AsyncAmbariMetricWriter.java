@@ -34,9 +34,9 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
     private AsyncTimelineRestClient timelineRestClient;
 
     public AsyncAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-            String hostName, int metricsBufferSize) {
+            String hostName, String instanceId, int metricsBufferSize) {
 
-        super(applicationId, hostName, metricsBufferSize);
+        super(applicationId, hostName, instanceId, metricsBufferSize);
 
         this.timelineRestClient = new AsyncTimelineRestClient(metricsCollectorHost, metricsCollectorPort);
     }

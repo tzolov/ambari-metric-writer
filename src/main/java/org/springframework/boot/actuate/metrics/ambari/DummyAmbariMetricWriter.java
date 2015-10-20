@@ -36,9 +36,9 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
     private ObjectMapper objectMapper;
 
     public DummyAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
-            String hostName, int metricsBufferSize) {
+            String hostName, String instanceId, int metricsBufferSize) {
 
-        super(applicationId, hostName, metricsBufferSize);
+        super(applicationId, hostName, instanceId, metricsBufferSize);
 
         JaxbAnnotationModule module = new JaxbAnnotationModule();
         objectMapper = new ObjectMapper();
