@@ -59,8 +59,6 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
             logger.info("New Metrics: \n" + out.toString());
         } catch (IOException e) {
             logger.error("", e);
-        } finally {
-            freePoolObjects(timelineMetrics);
         }
     }
 }

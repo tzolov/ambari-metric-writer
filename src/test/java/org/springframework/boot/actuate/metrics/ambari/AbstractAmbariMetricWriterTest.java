@@ -62,13 +62,13 @@ public abstract class AbstractAmbariMetricWriterTest {
 
         mockServer.verify();
 
-        assertEquals(1, ambariMetricWriter.getTimelineMetricsPool().getBorrowedCount());
-        assertEquals(1, ambariMetricWriter.getTimelineMetricPool().getBorrowedCount());
+        assertEquals(1, ambariMetricWriter.getMetricObjectPool().getTimelineMetricsPool().getBorrowedCount());
+        assertEquals(1, ambariMetricWriter.getMetricObjectPool().getTimelineMetricPool().getBorrowedCount());
 
-        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
-                .getNumActive());
-        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
-                .getNumActive());
+        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getMetricObjectPool()
+                .getTimelineMetricsPool().getNumActive());
+        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getMetricObjectPool()
+                .getTimelineMetricPool().getNumActive());
     }
 
     @Test
@@ -95,10 +95,10 @@ public abstract class AbstractAmbariMetricWriterTest {
 
         mockServer.verify();
 
-        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getTimelineMetricsPool()
-                .getNumActive());
-        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getTimelineMetricPool()
-                .getNumActive());
+        assertEquals("Not released TimelineMetrics pool object", 0, ambariMetricWriter.getMetricObjectPool()
+                .getTimelineMetricsPool().getNumActive());
+        assertEquals("Not released TimelineMetric pool object", 0, ambariMetricWriter.getMetricObjectPool()
+                .getTimelineMetricPool().getNumActive());
     }
 
     private static Metric<Number> metric(String name, long timestamp, float value) {

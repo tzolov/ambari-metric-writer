@@ -43,6 +43,12 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
     }
 
     @Override
+    protected void sendMetricsAndCleanPool(TimelineMetrics timelineMetrics) {
+        // Override the default behavior to allow cleaning the pool object asynchronously
+        doSendMetrics(timelineMetrics);
+    }
+
+    @Override
     protected void doSendMetrics(TimelineMetrics timelineMetrics) {
         // Send the metrics to the Ambari Metrics Collector
         metricsCollectorRestClient.putMetrics(timelineMetrics, new ResponseListener(timelineMetrics));
@@ -61,13 +67,13 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
         public void onFailure(Throwable ex) {
             logger.warn("Failed to send timeline metrics!", ex);
             // Return the TimelineMetric objects to the pool
-            freePoolObjects(timelineMetrics);
+            cleanMetricPool(timelineMetrics);
         }
 
         @Override
         public void onSuccess(ResponseEntity<Map> result) {
             // Return the TimelineMetric objects to the pool
-            freePoolObjects(timelineMetrics);
+            cleanMetricPool(timelineMetrics);
         }
     }
 

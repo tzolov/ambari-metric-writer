@@ -18,86 +18,59 @@
 
 package org.springframework.boot.actuate.metrics.ambari;
 
+import static java.util.Collections.min;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import it.unimi.dsi.fastutil.longs.Long2FloatArrayMap;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.Metric;
+import org.springframework.boot.actuate.metrics.ambari.buffer.MetricBuffer;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetric;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
-import org.springframework.boot.actuate.metrics.ambari.pool.TimelineMetricFactory;
-import org.springframework.boot.actuate.metrics.ambari.pool.TimelineMetricsFactory;
+import org.springframework.boot.actuate.metrics.ambari.pool.MetricObjectPool;
 import org.springframework.boot.actuate.metrics.writer.Delta;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * A {@link MetricWriter} for the Aapache Ambari Timeline Server (version 2.1+), writing metrics to the HTTP endpoint
- * provided by the server. Data are buffered according to the {@link #setBufferSize(int) bufferSize} property, and only
- * flushed automatically when the buffer size is reached. Users should either manually {@link #flushMetricBuffer()}
- * after writing a batch of data if that makes sense, or consider adding a {@link Scheduled Scheduled} task to flush
+ * A {@link MetricWriter} for the Apache Ambari Metrics Service, writing metrics to the HTTP endpoint provided by the
+ * server. Data are buffered according to the {@link #setBufferSize(int) bufferSize} property, and only flushed
+ * automatically when the buffer size is reached. Users should either manually {@link #flushMetricBuffer()} after
+ * writing a batch of data if that makes sense, or consider adding a {@link Scheduled Scheduled} task to flush
  * periodically.
  * 
  * This is an common abstract class. Extensions should implement the {@link #doSendMetrics(TimelineMetrics)} to allow
- * transition of SpringBoot metrics to the Timeline Server.
+ * transition of SpringBoot metrics to the Ambari Metrics Collector.
  * 
  * The implementation of the {@link #doSendMetrics(TimelineMetrics)} must call the
- * {@link #freePoolObjects(TimelineMetrics)} after transmitting the metrics, to return thetimelineMetrics to the object
+ * {@link #cleanMetricPool(TimelineMetrics)} after transmitting the metrics, to return thetimelineMetrics to the object
  * pool.
  * 
- * @author christian.tzolov@gmail.com
+ * @author tzolov@apache.org
  *
  */
-public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Closeable */{
+public abstract class AbstractAmbariMetricWriter implements MetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractAmbariMetricWriter.class);
 
-    private final static long FIVE_SECONDS = 5 * 1000;
+    /**
+     * Uniquely identify service/application within Ambari Metrics Collector.
+     */
+    private String metricApplicationId;
 
     /**
-     * Uniquely identify service/application within Ambari.
+     * Used as second key part when storing metrics in the Ambari Metrics Collector.
      */
-    private String applicationId;
+    private String metricHostName;
 
     /**
-     * Used as second key part when storing metrics in the Timeline server.
+     * Metric instance id (optional).
      */
-    private String hostName;
-
-    /**
-     * Instance id (optional).
-     */
-    private String instanceId = "nil";
-
-    /**
-     * Ambari Metric start time is set to the writer creation time.
-     */
-    private long startTime;
-
-    /**
-     * Lock used to synchronize the writing of new metrics and their transition to the server.
-     */
-    private ReentrantLock bufferLock;
-
-    /**
-     * Metric buffer to fill before posting data to server.
-     */
-    private Map<String, Map<Long, Float>> metricBuffer;
-
-    /**
-     * Keep the count of all metric entries collected in the namedMetricsBuffer map.
-     */
-    private AtomicLong bufferedMetricCount;
+    private String metricInstanceId;
 
     /**
      * Metric buffer size to fill before posting data to server.
@@ -105,34 +78,25 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
     private int bufferSize;
 
     /**
+     * Metric buffer to patch the input metrcis and post them in batches.
+     */
+    private MetricBuffer metricBuffer;
+
+    /**
      * Object pools used for TimelineMetric and TimelineMetrics objects.
      */
-    private GenericObjectPool<TimelineMetrics> timelineMetricsPool;
-
-    private GenericObjectPool<TimelineMetric> timelineMetricPool;
+    private MetricObjectPool metricObjectPool;
 
     public AbstractAmbariMetricWriter(String applicationId, String hostName, String instanceId, int metricsBufferSize) {
 
-        this.applicationId = applicationId;
-        this.hostName = hostName;
-        this.instanceId = instanceId;
-        this.startTime = System.currentTimeMillis();
+        this.metricApplicationId = applicationId;
+        this.metricHostName = hostName;
+        this.metricInstanceId = instanceId;
 
+        this.metricBuffer = new MetricBuffer();
         this.bufferSize = metricsBufferSize;
 
-        this.timelineMetricPool = new GenericObjectPool<TimelineMetric>(new TimelineMetricFactory());
-        this.timelineMetricPool.setMaxTotal(Math.max(1000, bufferSize * 10));
-        this.timelineMetricPool.setMaxWaitMillis(FIVE_SECONDS);
-
-        this.timelineMetricsPool = new GenericObjectPool<TimelineMetrics>(new TimelineMetricsFactory());
-        this.timelineMetricsPool.setMaxTotal(1000);
-        this.timelineMetricsPool.setMaxWaitMillis(FIVE_SECONDS);
-
-        this.bufferLock = new ReentrantLock();
-
-        this.bufferedMetricCount = new AtomicLong(0);
-
-        this.metricBuffer = new HashMap<String, Map<Long, Float>>();
+        this.metricObjectPool = new MetricObjectPool(1000, Math.max(1000, bufferSize * 10));
     }
 
     @Override
@@ -151,133 +115,98 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
 
         logger.debug("Set: " + metric);
 
-        // Obtain a metrics sent lock. Only one thread can send the metrics over time!
-        try {
-            if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
-                try {
+        metricBuffer.add(metric);
 
-                    addMetricToBuffer(metric);
-
-                    // Flush the buffer if filled up
-                    if (bufferedMetricCount.incrementAndGet() > bufferSize) {
-                        flushMetricBuffer();
-                    }
-
-                } finally {
-                    bufferLock.unlock();
-                }
-            }
-        } catch (InterruptedException e) {
-            logger.warn("Failed to buffer metric: " + metric + " due to locked thread!");
+        if (metricBuffer.size() > bufferSize) {
+            flushMetricBuffer();
         }
-    }
-
-    private void addMetricToBuffer(Metric<?> metric) {
-
-        String metricName = metric.getName();
-
-        if (!metricBuffer.containsKey(metricName)) {
-            metricBuffer.put(metricName, new Long2FloatArrayMap());
-        }
-
-        metricBuffer.get(metricName).put(metric.getTimestamp().getTime(), metric.getValue().floatValue());
     }
 
     /**
-     * Flush the buffer without waiting for it to fill any further.
+     * Flush the buffer without waiting for it to fill any further. Converts the namedMetricsBuffer into
+     * {@link TimelineMetrics} instance and send the later to the Ambari Metrics Collector through the
+     * {@link #doSendMetrics(TimelineMetrics)} abstract method.
      */
     public void flushMetricBuffer() {
 
-        if (isEmpty(metricBuffer)) {
+        if (metricBuffer.size() <= 0) {
             return;
         }
 
-        doFlushBufferedMetrics(getBufferSnapshot());
-    }
+        Map<String, Map<Long, Float>> metricsSnapshot = metricBuffer.flush();
 
-    private Map<String, Map<Long, Float>> getBufferSnapshot() {
-
-        HashMap<String, Map<Long, Float>> snapshot = new HashMap<String, Map<Long, Float>>();
-        try {
-            if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
-                for (Entry<String, Map<Long, Float>> metricEntry : metricBuffer.entrySet()) {
-                    String metricName = metricEntry.getKey();
-                    Map<Long, Float> metricValues = metricEntry.getValue();
-
-                    if (!isEmpty(metricValues)) {
-                        snapshot.put(metricName, ((Long2FloatArrayMap) metricValues).clone());
-                        metricValues.clear();
-                    }
-                }
-
-                // Reset the buffer metric count
-                bufferedMetricCount.set(0);
-            }
-        } catch (InterruptedException e) {
-            logger.warn("Metric Buffer flush failed due to locked thread!");
-        } finally {
-            bufferLock.unlock();
+        if (!isEmpty(metricsSnapshot)) {
+            // Send the metrics to Ambari Metrics Collector
+            sendMetricsAndCleanPool(toTimelineMetrics(metricsSnapshot));
         }
-
-        return snapshot;
     }
 
     /**
-     * Converts the namedMetricsBuffer into {@link TimelineMetrics} instance and send the later to the Ambari Timeline
-     * Server through the {@link #doSendMetrics(TimelineMetrics)} abstract method.
+     * Sends the {@link TimelineMetrics} to the Ambari Metric Collector and cleans the Metric Objects Pool.
      * 
-     * It uses the object pools to minimize the creation of {@link TimelineMetric} and {@link TimelineMetrics} object
-     * instance. Therefore the {@link #doSendMetrics(TimelineMetrics)} must implement the return of the used objects to
-     * the pool!
-     * 
-     * @param namedMetricsBuffer
+     * @param timelineMetrics
+     *            {@link TimelineMetrics} to send
      */
-    private void doFlushBufferedMetrics(Map<String, Map<Long, Float>> namedMetricsBuffer) {
-
-        if (isEmpty(namedMetricsBuffer)) {
-            return;
+    protected void sendMetricsAndCleanPool(TimelineMetrics timelineMetrics) {
+        try {
+            // Send the metrics to Ambari Metrics Collector
+            doSendMetrics(timelineMetrics);
+        } finally {
+            // Always return the TimelineMetric(s) objects to the pool
+            cleanMetricPool(timelineMetrics);
         }
+    }
+
+    /**
+     * Converts the metricsSnapshots into {@link TimelineMetrics} instance. It uses the object pools to minimize the
+     * creation of {@link TimelineMetric} and {@link TimelineMetrics} object instance.
+     * 
+     * @param metricsSnapshot
+     * @return Returns {@link TimelineMetrics}
+     */
+    private TimelineMetrics toTimelineMetrics(Map<String, Map<Long, Float>> metricsSnapshot) {
 
         try {
-            TimelineMetrics timelineMetrics = timelineMetricsPool.borrowObject();
+            TimelineMetrics timelineMetrics = metricObjectPool.getTimelineMetrics();
 
-            Iterator<String> metricNames = namedMetricsBuffer.keySet().iterator();
+            Iterator<String> metricNames = metricsSnapshot.keySet().iterator();
 
             while (metricNames.hasNext()) {
-
                 String metricName = metricNames.next();
-                Map<Long, Float> metricValues = namedMetricsBuffer.get(metricName);
+                Map<Long, Float> metricValues = metricsSnapshot.get(metricName);
+
                 if (!isEmpty(metricValues)) {
                     try {
-                        TimelineMetric metric = timelineMetricPool.borrowObject();
+                        TimelineMetric metric = metricObjectPool.getTimelineMetricFor(timelineMetrics);
 
                         metric.setMetricName(metricName);
-                        metric.setAppId(applicationId);
-                        metric.setHostName(hostName);
-                        metric.setInstanceId(instanceId);
-                        metric.setStartTime(startTime);
+                        metric.setAppId(metricApplicationId);
+                        metric.setHostName(metricHostName);
+                        metric.setInstanceId(metricInstanceId);
+                        metric.setStartTime(getStartTime(metricValues.keySet()));
                         metric.setMetricValues(metricValues);
-
-                        // Add metric to the list of metrics to send
-                        timelineMetrics.getMetrics().add(metric);
                     } catch (Exception e) {
                         logger.error("Failed to borrow TimelineMetric object for:" + metricName, e);
                     }
                 }
             }
 
-            // Send the metrics to Ambari Timeline Server
-            doSendMetrics(timelineMetrics);
+            return timelineMetrics;
 
         } catch (Exception e1) {
             logger.error("Failed to send TimelineMetrics!", e1);
+            return null;
         }
     }
 
+    private long getStartTime(Collection<Long> times) {
+        return isEmpty(times) ? 0 : min(times);
+    }
+
     /**
-     * To implement the transition of the {@link TimelineMetrics} to the Ambari Timeline Server.
+     * To implement the transition of the {@link TimelineMetrics} to the Ambari Metric Collector.
      * 
-     * Implementation of this method must use the {@link #freePoolObjects(TimelineMetrics)} to return thetimelineMetrics
+     * Implementation of this method must use the {@link #cleanMetricPool(TimelineMetrics)} to return thetimelineMetrics
      * to the object pool.
      * 
      * @param timelineMetrics
@@ -292,74 +221,32 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
      *            {@link TimelineMetrics} object to return to the timelineMetricsPool. {@link TimelineMetrics} contains
      *            list of {@link TimelineMetric} in trun returned to the timelineMetricPool.
      */
-    protected void freePoolObjects(TimelineMetrics timelineMetrics) {
-
-        if (timelineMetrics == null) {
-            return;
-        }
-
-        if (!isEmpty(timelineMetrics.getMetrics())) {
-            for (TimelineMetric metric : timelineMetrics.getMetrics()) {
-                try {
-                    // Clears the metricValues list as well!
-                    this.timelineMetricPool.returnObject(metric);
-                } catch (Exception e) {
-                    logger.warn("Failed to return TimelineMetric object to the pool", e);
-                }
-            }
-        }
-
-        // Clears the metrics list as well
-        this.timelineMetricsPool.returnObject(timelineMetrics);
+    protected void cleanMetricPool(TimelineMetrics timelineMetrics) {
+        metricObjectPool.returnObjects(timelineMetrics);
     }
 
-    // @Override
-    // public void close() throws IOException {
-    //
-    // try {
-    // if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
-    // try {
-    // metricBuffer.clear();
-    //
-    // timelineMetricPool.clear();
-    // timelineMetricPool.close();
-    // timelineMetricsPool.clear();
-    // timelineMetricsPool.close();
-    // } finally {
-    // bufferLock.unlock();
-    // }
-    // }
-    // } catch (InterruptedException e) {
-    // logger.warn("", e);
-    // }
-    // }
-
-    public String getApplicationId() {
-        return applicationId;
+    public String getMetricApplicationId() {
+        return metricApplicationId;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
+    public void setMetricApplicationId(String applicationId) {
+        this.metricApplicationId = applicationId;
     }
 
-    public String getHostName() {
-        return hostName;
+    public String getMetricHostName() {
+        return metricHostName;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setMetricHostName(String hostName) {
+        this.metricHostName = hostName;
     }
 
-    public String getInstanceId() {
-        return instanceId;
+    public String getMetricInstanceId() {
+        return metricInstanceId;
     }
 
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    public long getBufferedMetricCount() {
-        return bufferedMetricCount.get();
+    public void setMetricInstanceId(String instanceId) {
+        this.metricInstanceId = instanceId;
     }
 
     public int getBufferSize() {
@@ -370,12 +257,7 @@ public abstract class AbstractAmbariMetricWriter implements MetricWriter /* , Cl
         this.bufferSize = bufferSize;
     }
 
-    // Test only
-    GenericObjectPool<TimelineMetrics> getTimelineMetricsPool() {
-        return timelineMetricsPool;
-    }
-
-    GenericObjectPool<TimelineMetric> getTimelineMetricPool() {
-        return timelineMetricPool;
+    public MetricObjectPool getMetricObjectPool() {
+        return this.metricObjectPool;
     }
 }

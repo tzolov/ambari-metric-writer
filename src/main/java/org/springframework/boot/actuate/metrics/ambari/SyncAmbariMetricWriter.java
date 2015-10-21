@@ -50,13 +50,8 @@ public class SyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
         logger.debug("Send metrics");
 
-        try {
-            // REST call to send the metrics to the Ambari Metrics Collector
-            metricsCollectorRestClient.putMetrics(timelineMetrics);
-        } finally {
-            // Always return the TimelineMetric(s) objects to the pool
-            freePoolObjects(timelineMetrics);
-        }
+        // REST call to send the metrics to the Ambari Metrics Collector
+        metricsCollectorRestClient.putMetrics(timelineMetrics);
     }
 
     // Test purpose only
