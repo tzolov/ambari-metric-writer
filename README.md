@@ -29,7 +29,7 @@ The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/
     <dependency>
       <groupId>org.springframework.boot.actuate.metrics</groupId>
       <artifactId>ambari-metric-writer</artifactId>
-      <version>0.0.7</version>
+      <version>0.0.8</version>
     </dependency>    
     
     <dependency>
