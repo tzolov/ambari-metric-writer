@@ -23,7 +23,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
-import org.springframework.boot.actuate.metrics.ambari.restclient.AsyncTimelineRestClient;
+import org.springframework.boot.actuate.metrics.ambari.restclient.AsyncAmbariMetricsCollectorRestClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
@@ -31,28 +31,29 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncAmbariMetricWriter.class);
 
-    private AsyncTimelineRestClient timelineRestClient;
+    private AsyncAmbariMetricsCollectorRestClient metricsCollectorRestClient;
 
     public AsyncAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
             String hostName, String instanceId, int metricsBufferSize) {
 
         super(applicationId, hostName, instanceId, metricsBufferSize);
 
-        this.timelineRestClient = new AsyncTimelineRestClient(metricsCollectorHost, metricsCollectorPort);
+        this.metricsCollectorRestClient = new AsyncAmbariMetricsCollectorRestClient(metricsCollectorHost,
+                metricsCollectorPort);
     }
 
     @Override
     protected void doSendMetrics(TimelineMetrics timelineMetrics) {
-        // REST call to send the metrics to the Ambari Timeline Server
-        timelineRestClient.putMetrics(timelineMetrics, new RestResponseListener(timelineMetrics));
+        // Send the metrics to the Ambari Metrics Collector
+        metricsCollectorRestClient.putMetrics(timelineMetrics, new ResponseListener(timelineMetrics));
     }
 
     @SuppressWarnings("rawtypes")
-    private class RestResponseListener implements ListenableFutureCallback<ResponseEntity<Map>> {
+    private class ResponseListener implements ListenableFutureCallback<ResponseEntity<Map>> {
 
         private TimelineMetrics timelineMetrics;
 
-        public RestResponseListener(TimelineMetrics timelineMetrics) {
+        public ResponseListener(TimelineMetrics timelineMetrics) {
             this.timelineMetrics = timelineMetrics;
         }
 
@@ -71,7 +72,7 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
     }
 
     // Test purpose only
-    public AsyncTimelineRestClient getTimelineRestClient() {
-        return timelineRestClient;
+    public AsyncAmbariMetricsCollectorRestClient getTimelineRestClient() {
+        return metricsCollectorRestClient;
     }
 }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
-import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
+import org.springframework.boot.actuate.metrics.ambari.SyncAmbariMetricWriter;
 import org.springframework.boot.actuate.metrics.ambari.AsyncAmbariMetricWriter;
 import org.springframework.boot.actuate.metrics.ambari.DummyAmbariMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
@@ -26,7 +26,7 @@ public class AmbariMetricConfiguration {
     @Bean
     @ExportMetricWriter
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "spring.metrics.export.ambari", name = "timeline-host")
+    @ConditionalOnProperty(prefix = "spring.metrics.export.ambari", name = "metrics-collector-host")
     public MetricWriter ambariMetricExporter() {
 
         if (StringUtils.isEmpty(properties.getWriterType())
@@ -40,20 +40,20 @@ public class AmbariMetricConfiguration {
 
         if (properties.getWriterType().trim().equalsIgnoreCase("sync")) {
 
-            metricWriter = new AmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
-                    properties.getMetricsBufferSize());
+            metricWriter = new SyncAmbariMetricWriter(properties.getMetricsCollectorHost(), ""
+                    + properties.getMetricsCollectorPort(), properties.getApplicationId(), properties.getHostName(),
+                    properties.getInstanceId(), properties.getMetricsBufferSize());
 
         } else if (properties.getWriterType().trim().equalsIgnoreCase("async")) {
 
-            metricWriter = new AsyncAmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
-                    properties.getMetricsBufferSize());
+            metricWriter = new AsyncAmbariMetricWriter(properties.getMetricsCollectorHost(), ""
+                    + properties.getMetricsCollectorPort(), properties.getApplicationId(), properties.getHostName(),
+                    properties.getInstanceId(), properties.getMetricsBufferSize());
         } else {
 
-            metricWriter = new DummyAmbariMetricWriter(properties.getTimelineHost(), "" + properties.getTimelinePort(),
-                    properties.getApplicationId(), properties.getHostName(), properties.getInstanceId(),
-                    properties.getMetricsBufferSize());
+            metricWriter = new DummyAmbariMetricWriter(properties.getMetricsCollectorHost(), ""
+                    + properties.getMetricsCollectorPort(), properties.getApplicationId(), properties.getHostName(),
+                    properties.getInstanceId(), properties.getMetricsBufferSize());
         }
 
         return metricWriter;

@@ -34,30 +34,34 @@ import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-public class TimelineRestClientTest {
+public class SyncAmbariMetricsCollectorRestClientTest {
 
     private MockRestServiceServer mockServer;
-    private TimelineRestClient restClient;
+    private SyncAmbariMetricsCollectorRestClient restClient;
+
+    private String ambariMetricsCollectorHost = "localhost";
+    private String ambariMetricsCollectorPort = "6188";
 
     @Before
     public void before() {
-        String ambariMetricsCollectorHost = "localhost";
-        String ambariMetricsCollectorPort = "6188";
 
-        restClient = new TimelineRestClient(ambariMetricsCollectorHost, ambariMetricsCollectorPort);
+        restClient = new SyncAmbariMetricsCollectorRestClient(ambariMetricsCollectorHost, ambariMetricsCollectorPort);
         mockServer = MockRestServiceServer.createServer(restClient.getRestTemplate());
     }
 
     @Test
-    public void testTimelineClient() {
+    public void sendSuccess() {
 
         mockServer
-                .expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))
+                .expect(requestTo("http://" + ambariMetricsCollectorHost + ":" + ambariMetricsCollectorPort
+                        + "/ws/v1/timeline/metrics"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(
-                        content()
-                                .string("{\"metrics\":[{\"metricname\":\"Metric Name\",\"appid\":\"appid\",\"instanceid\":\"instance id\",\"hostname\":\"a host\",\"starttime\":696969,\"metrics\":{\"666666\":666.666,\"999999\":999.999}}]}"))
-                .andRespond(withSuccess());
+                        content().string(
+                                "{\"metrics\":[{\"metricname\":\"Metric Name\","
+                                        + "\"appid\":\"appid\",\"instanceid\":\"instance id\","
+                                        + "\"hostname\":\"a host\",\"starttime\":696969,\"metrics\":"
+                                        + "{\"666666\":666.666,\"999999\":999.999}}]}")).andRespond(withSuccess());
 
         TimelineMetric tm = new TimelineMetric();
         tm.setAppId("appid");

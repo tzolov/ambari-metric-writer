@@ -21,20 +21,28 @@ package org.springframework.boot.actuate.metrics.ambari;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
-import org.springframework.boot.actuate.metrics.ambari.restclient.TimelineRestClient;
+import org.springframework.boot.actuate.metrics.ambari.restclient.SyncAmbariMetricsCollectorRestClient;
+import org.springframework.web.client.RestTemplate;
 
-public class AmbariMetricWriter extends AbstractAmbariMetricWriter {
+/**
+ * Based on {@link RestTemplate} synchronous implementation of the AmbariMetricWriter.
+ * 
+ * @author tzolov@apache.org
+ *
+ */
+public class SyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmbariMetricWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SyncAmbariMetricWriter.class);
 
-    private TimelineRestClient timelineRestClient;
+    private SyncAmbariMetricsCollectorRestClient metricsCollectorRestClient;
 
-    public AmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
+    public SyncAmbariMetricWriter(String metricsCollectorHost, String metricsCollectorPort, String applicationId,
             String hostName, String instanceId, int metricsBufferSize) {
 
         super(applicationId, hostName, instanceId, metricsBufferSize);
 
-        this.timelineRestClient = new TimelineRestClient(metricsCollectorHost, metricsCollectorPort);
+        this.metricsCollectorRestClient = new SyncAmbariMetricsCollectorRestClient(metricsCollectorHost,
+                metricsCollectorPort);
     }
 
     @Override
@@ -42,16 +50,17 @@ public class AmbariMetricWriter extends AbstractAmbariMetricWriter {
 
         logger.debug("Send metrics");
 
-        // REST call to send the metrics to the Ambari Timeline Server
-        timelineRestClient.putMetrics(timelineMetrics);
-
-        // Return the TimelineMetric objects to the pool
-        freePoolObjects(timelineMetrics);
+        try {
+            // REST call to send the metrics to the Ambari Metrics Collector
+            metricsCollectorRestClient.putMetrics(timelineMetrics);
+        } finally {
+            // Always return the TimelineMetric(s) objects to the pool
+            freePoolObjects(timelineMetrics);
+        }
     }
 
     // Test purpose only
-    public TimelineRestClient getTimelineRestClient() {
-        return timelineRestClient;
+    public SyncAmbariMetricsCollectorRestClient getTimelineRestClient() {
+        return metricsCollectorRestClient;
     }
-
 }

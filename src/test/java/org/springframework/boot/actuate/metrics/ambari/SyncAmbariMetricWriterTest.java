@@ -20,7 +20,7 @@ package org.springframework.boot.actuate.metrics.ambari;
 import org.junit.Before;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-public class AmbariMetricWriterTest extends AbstractAmbariMetricWriterTest {
+public class SyncAmbariMetricWriterTest extends AbstractAmbariMetricWriterTest {
 
     private int metricsBufferSize = 10;
     private String ambariMetricsCollectorHost = "localhost";
@@ -32,10 +32,10 @@ public class AmbariMetricWriterTest extends AbstractAmbariMetricWriterTest {
     @Before
     public void before() {
 
-        ambariMetricWriter = new AmbariMetricWriter(ambariMetricsCollectorHost, ambariMetricsCollectorPort,
+        ambariMetricWriter = new SyncAmbariMetricWriter(ambariMetricsCollectorHost, ambariMetricsCollectorPort,
                 applicationId, hostName, instanceId, metricsBufferSize);
 
-        mockServer = MockRestServiceServer.createServer(((AmbariMetricWriter) ambariMetricWriter)
+        mockServer = MockRestServiceServer.createServer(((SyncAmbariMetricWriter) ambariMetricWriter)
                 .getTimelineRestClient().getRestTemplate());
     }
 }

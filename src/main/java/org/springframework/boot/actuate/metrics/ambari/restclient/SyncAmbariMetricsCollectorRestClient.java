@@ -34,11 +34,17 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
-public class TimelineRestClient {
+/**
+ * Synchronous client that uses the Ambari Metrics Collector REST API to transmit {@link TimelineMetrics}.
+ * (https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
+ * 
+ * @author tzolov@apache.org
+ */
+public class SyncAmbariMetricsCollectorRestClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(TimelineRestClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(SyncAmbariMetricsCollectorRestClient.class);
 
-    private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{ambari-metrics-collector}:{port}/ws/v1/timeline/metrics";
+    private static final String AMBARI_METRICS_COLLECTOR_URL = "http://{host}:{port}/ws/v1/timeline/metrics";
 
     private String ambariMetricsCollectorHost = "localhost";
 
@@ -51,7 +57,7 @@ public class TimelineRestClient {
 
     private RestTemplate restTemplate = null;
 
-    public TimelineRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
+    public SyncAmbariMetricsCollectorRestClient(String ambariMetricsCollectorHost, String ambariMetricsCollectorPort) {
         this.ambariMetricsCollectorHost = ambariMetricsCollectorHost;
         this.ambariMetricsCollectorPort = ambariMetricsCollectorPort;
         this.restTemplate = createTimelineClient();

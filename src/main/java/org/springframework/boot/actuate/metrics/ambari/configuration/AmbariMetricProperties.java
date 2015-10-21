@@ -9,23 +9,23 @@ import org.springframework.stereotype.Component;
 public class AmbariMetricProperties {
 
     /**
-     * Host of a Ambari Timeline server to receive exported metrics.
+     * Host of a Ambari Metrics Collector server host to receive exported metrics.
      */
-    private String timelineHost;
+    private String metricsCollectorHost;
 
     /**
-     * Port of a Ambari Timeline server to receive exported metrics.
+     * Port of a Ambari Metrics Collector server port to receive exported metrics.
      */
-    private int timelinePort = 6188;
+    private int metricsCollectorPort = 6188;
 
     /**
-     * Uniquely identify service/application within Ambari Timeline Server.
+     * Uniquely identify service/application within Ambari Metrics Collector.
      */
     @Value("${spring.application.name:application}.${random.value:0000}")
     private String applicationId;
 
     /**
-     * Used as second key part when storing metrics in the Timeline server.
+     * Used as second key part when storing metrics in the Ambari Metrics Collector.
      */
     @Value("${server.address:hostname}")
     private String hostName;
@@ -62,20 +62,20 @@ public class AmbariMetricProperties {
         this.writerType = writerType;
     }
 
-    public String getTimelineHost() {
-        return timelineHost;
+    public String getMetricsCollectorHost() {
+        return metricsCollectorHost;
     }
 
-    public void setTimelineHost(String timelineHost) {
-        this.timelineHost = timelineHost;
+    public void setMetricsCollectorHost(String metricsCollectorHost) {
+        this.metricsCollectorHost = metricsCollectorHost;
     }
 
-    public int getTimelinePort() {
-        return timelinePort;
+    public int getMetricsCollectorPort() {
+        return metricsCollectorPort;
     }
 
-    public void setTimelinePort(int timelinePort) {
-        this.timelinePort = timelinePort;
+    public void setMetricsCollectorPort(int metricsCollectorPort) {
+        this.metricsCollectorPort = metricsCollectorPort;
     }
 
     public String getApplicationId() {

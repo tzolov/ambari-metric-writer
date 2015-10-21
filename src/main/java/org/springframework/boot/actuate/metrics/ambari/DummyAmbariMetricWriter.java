@@ -23,13 +23,18 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
+/**
+ * Encodes the {@link TimelineMetrics} into JSON and prints it in the log.
+ * 
+ * @author tzolov@apache.org
+ *
+ */
 public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(DummyAmbariMetricWriter.class);
@@ -47,23 +52,15 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
     }
 
     @Override
-    public void set(Metric<?> metric) {
-        // logger.info("Metric Count: " + getBufferedMetricCount().get());
-        super.set(metric);
-    }
-
-    @Override
     protected void doSendMetrics(TimelineMetrics timelineMetrics) {
-
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             objectMapper.writeValue(out, timelineMetrics);
-
-            logger.info("Send New Metrics: \n" + out.toString());
-
-            freePoolObjects(timelineMetrics);
+            logger.info("New Metrics: \n" + out.toString());
         } catch (IOException e) {
             logger.error("", e);
+        } finally {
+            freePoolObjects(timelineMetrics);
         }
     }
 }

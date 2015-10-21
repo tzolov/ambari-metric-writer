@@ -38,25 +38,24 @@ The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/
     </dependency>
 ```
 
-* Add `AmbariMetricWriter.class` to `@SpringBootApplication` scan path and set the `spring.metrics.export.ambari.timeline-host` property via the `application.properties` or the command line (`--spring.metrics.export.ambari.timeline-host=timelineServerHost`).
+* Add `AbstractAmbariMetricWriter.class` to `@SpringBootApplication` scan path and set the `spring.metrics.export.ambari.metrics-collector-host` property via the `application.properties` or the command line (`--spring.metrics.export.ambari.metrics-collector-host=<your-ambari-metrics-collector-host>`).
 
 ```java
-import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
+import org.springframework.boot.actuate.metrics.ambari.AbstractAmbariMetricWriter;
 
-@SpringBootApplication(scanBasePackageClasses = { AmbariMetricWriter.class })
+@SpringBootApplication(scanBasePackageClasses = { AbstractAmbariMetricWriter.class })
 public class YourSpringBootApplication {
 	public static void main(String[] args) {
-		SpringApplication app = new SpringApplication(YourSpringBootApplication.class);
-		app.run(args);
+		new SpringApplication(YourSpringBootApplication.class).run(args);
 	}
 }
 ```
 
-* Alternatively provide a `@Bean` of type `AmbariMetricWriter` and mark it `@ExportMetricWriter` metrics are exported to Ambari Metric Collector. 
+* Alternatively provide a `@Bean` of type `SyncAmbariMetricWriter` and mark it `@ExportMetricWriter` metrics are exported to Ambari Metric Collector. 
 
 ```java
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
-import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
+import org.springframework.boot.actuate.metrics.ambari.SyncAmbariMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +66,7 @@ public class MySpringBootAppConfiguration {
 	@Bean
 	@ExportMetricWriter
 	public MetricWriter metricExporter() {
-		return new AmbariMetricWriter(
+		return new SyncAmbariMetricWriter(
 			"AmbariMetricCollectorHost",  // AMS host name
 			"AmbariMetricsCollectorPort", // AMS port number
 			"AppID666",                   // metric primary key
@@ -101,9 +100,9 @@ In addition to the common properties following properties configure the Ambari M
 | ------------- |:-------------:| -----|
 | spring.metrics.export.ambari.writer-type | sync  | `synch` (default) uses synchronous REST calls to send the metrics to the server. The `async` uses asynchronous REST calls to transmit the metrics and `dummy` prints the metrics to the log.  |
 | spring.metrics.export.ambari.enabled | true  | When set to false the ambari export is deactivated  |
-| spring.metrics.export.ambari.timeline-host |  | Host of a Ambari Timeline server to receive exported metrics |
-| spring.metrics.export.ambari.timeline-port | 6188 | Port of a Ambari Timeline server to receive exported metrics |
-| spring.metrics.export.ambari.application-id | application.<radom int> | Uniquely identify service/application within Ambari |
+| spring.metrics.export.ambari.metrics-collector-host |  | Host of a Ambari Metrics Collector server host to receive exported metrics |
+| spring.metrics.export.ambari.metrics-collector-port | 6188 | Port of a Ambari Metrics Collector server to receive exported metrics |
+| spring.metrics.export.ambari.application-id | application.<radom int> | Uniquely identify service/application within Ambari Metrics Collector |
 | spring.metrics.export.ambari.host-name | <local IP>  | Secondary identifier |
 | spring.metrics.export.ambari.instance-id | null  | Application instance id. Required if multiple `application-id` are run in parallel |
 | spring.metrics.export.ambari.metrics-buffer-size | 100 | Metric buffer size to fill before posting data to server |
