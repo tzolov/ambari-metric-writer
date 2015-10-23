@@ -1,9 +1,9 @@
-# Spring Boot Metric Writer for Apache Ambari Metric System
+# Spring Boot Metric Exporter For Apache Ambari Metric System
 
 ### Overview
-The `ambari-metric-writer` allows you to export (at real time) all Spring [application metrics] (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) to [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
+The `ambari-metric-writer` exports (in real-time) all [spring application metrics] (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) to the [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
 
-It provides a Spring Boot `MetricWriter` for the Apache [Ambari Metric System](https://cwiki.apache.org/confluence/display/AMBARI/Metrics), writing metrics to the [HTTP endpoint](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification) provided by the server. Data is buffered according to the `buffer-size` property, and flushed automatically when the buffer size is reached. Users should either manually `flushMetricBuffer()` or consider adding a `Scheduled` task to flush periodically.
+It provides a Spring Boot `MetricWriter` for the Apache [Ambari Metric System](https://cwiki.apache.org/confluence/display/AMBARI/Metrics), writing metrics to the [HTTP endpoint](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification) provided by the server. Metrics data is buffered according to the `buffer-size` property, and flushed automatically when the buffer size is reached. Users should either manually `flushMetricBuffer()` or consider adding a `Scheduled` task to flush periodically.
 
 The [Spring Boot Actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready) includes a [Metrics Service](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) that automatically records all metrics and expoes them through the `metrics` endpoint. 
 The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/PublicMetrics.java) interface that you can implement to expose custom metrics (look at [SystemPublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/SystemPublicMetrics.java) for an example). 
@@ -29,7 +29,7 @@ The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/
     <dependency>
       <groupId>org.springframework.boot.actuate.metrics</groupId>
       <artifactId>ambari-metric-writer</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.10</version>
     </dependency>    
     
     <dependency>

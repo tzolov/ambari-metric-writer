@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.boot.actuate.metrics.ambari.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,12 +26,12 @@ import org.springframework.stereotype.Component;
 public class AmbariMetricProperties {
 
     /**
-     * Host of a Ambari Metrics Collector server host to receive exported metrics.
+     * Ambari Metrics Collector server host to receive exported metrics.
      */
     private String metricsCollectorHost;
 
     /**
-     * Port of a Ambari Metrics Collector server port to receive exported metrics.
+     * Ambari Metrics Collector server port to receive exported metrics. Defaults to 6188.
      */
     private int metricsCollectorPort = 6188;
 
@@ -37,7 +54,7 @@ public class AmbariMetricProperties {
     private String instanceId = null;
 
     /**
-     * Metric buffer size to fill before posting data to server.
+     * Metric buffer size to fill before posting data to server. Defaults to 100.
      */
     private int metricsBufferSize = 100;
 
