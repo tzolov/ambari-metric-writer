@@ -20,6 +20,11 @@ public class MetricBufferTest {
 
     private static final String M1 = "M1";
     private static final String M2 = "M2";
+    private static final String M3 = "M3";
+
+    private static final long TS1 = 11;
+    private static final long TS2 = 22;
+    private static final long TS3 = 33;
 
     @Before
     public void before() {
@@ -30,41 +35,41 @@ public class MetricBufferTest {
     public void testAdd() {
         assertEquals(0L, metricBuffer.size());
 
-        metricBuffer.add(metric(M1, 11, 111));
+        metricBuffer.add(metric1(M1, TS1, 111.0));
         assertThat(metricBuffer.size(), is(1L));
 
-        metricBuffer.add(metric(M1, 22, 222));
+        metricBuffer.add(metric1(M1, TS2, 222.0));
         assertThat(metricBuffer.size(), is(2L));
     }
 
     @Test
     public void testFlush() {
-        metricBuffer.add(metric(M1, 11, 111));
-        metricBuffer.add(metric(M1, 22, 222));
-        metricBuffer.add(metric(M2, 33, 333));
+        metricBuffer.add(metric1(M1, TS1, 111.0));
+        metricBuffer.add(metric1(M1, TS2, 222.0));
+        metricBuffer.add(metric1(M2, TS3, 333.0));
 
         assertThat(metricBuffer.size(), is(3L));
 
-        Map<String, Map<Long, Float>> snapshot = metricBuffer.flush();
+        Map<String, Map<Long, Double>> snapshot = metricBuffer.flush();
         assertThat(metricBuffer.size(), is(0L));
 
         assertThat(snapshot.keySet(), hasSize(2));
         assertThat(snapshot.keySet(), containsInAnyOrder(M1, M2));
 
         assertThat(snapshot.get(M1).keySet(), hasSize(2));
-        assertThat(snapshot.get(M1).keySet(), containsInAnyOrder(11l, 22l));
-        assertThat(snapshot.get(M1).values(), containsInAnyOrder(111f, 222f));
+        assertThat(snapshot.get(M1).keySet(), containsInAnyOrder(TS1, TS2));
+        assertThat(snapshot.get(M1).values(), containsInAnyOrder(111.0, 222.0));
 
         assertThat(snapshot.get(M2).keySet(), hasSize(1));
-        assertThat(snapshot.get(M2).keySet(), containsInAnyOrder(33l));
-        assertThat(snapshot.get(M2).values(), containsInAnyOrder(333f));
+        assertThat(snapshot.get(M2).keySet(), containsInAnyOrder(TS3));
+        assertThat(snapshot.get(M2).values(), containsInAnyOrder(333.0));
     }
 
     @Test
     public void testClose() throws IOException {
-        metricBuffer.add(metric(M1, 11, 111));
-        metricBuffer.add(metric(M1, 22, 222));
-        metricBuffer.add(metric(M2, 33, 333));
+        metricBuffer.add(metric1(M1, TS1, 111.0));
+        metricBuffer.add(metric1(M1, TS2, 222.0));
+        metricBuffer.add(metric1(M2, TS3, 333.0));
 
         assertThat(metricBuffer.size(), is(3L));
 
@@ -73,7 +78,19 @@ public class MetricBufferTest {
         assertThat(metricBuffer.size(), is(0L));
     }
 
-    private Metric<Float> metric(String name, long timestamp, float value) {
-        return new Metric<Float>(name, value, new Date(timestamp));
+    @Test
+    public void metricTypes() {
+        metricBuffer.add(new Metric<Double>(M1, 11.0, new Date(TS1)));
+        assertThat(metricBuffer.getMetricType(M1), is("Double"));
+
+        metricBuffer.add(new Metric<Long>(M2, 11L, new Date(TS2)));
+        assertThat(metricBuffer.getMetricType(M2), is("Long"));
+
+        metricBuffer.add(new Metric<Float>(M3, 11.0f, new Date(TS3)));
+        assertThat(metricBuffer.getMetricType(M3), is("Float"));
+    }
+
+    private Metric<?> metric1(String name, long timestamp, Double value) {
+        return new Metric<Double>(name, value, new Date(timestamp));
     }
 }

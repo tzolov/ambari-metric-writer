@@ -32,6 +32,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 /**
@@ -85,7 +86,8 @@ public class SyncAmbariMetricsCollectorRestClient {
 
         MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
         JaxbAnnotationModule module = new JaxbAnnotationModule();
-        mc.getObjectMapper().registerModule(module);
+        mc.getObjectMapper().registerModule(module);        
+        mc.getObjectMapper().setSerializationInclusion(Include.NON_NULL);
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().clear();

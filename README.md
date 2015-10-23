@@ -38,12 +38,12 @@ The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/
     </dependency>
 ```
 
-* Add `AbstractAmbariMetricWriter.class` to `@SpringBootApplication` scan path and set the `spring.metrics.export.ambari.metrics-collector-host` property via the `application.properties` or the command line (`--spring.metrics.export.ambari.metrics-collector-host=<your-ambari-metrics-collector-host>`).
+* Add `AmbariMetricWriter.class` to `@SpringBootApplication` scan path and set the `spring.metrics.export.ambari.metrics-collector-host` property via the `application.properties` or the command line (`--spring.metrics.export.ambari.metrics-collector-host=<your-ambari-metrics-collector-host>`).
 
 ```java
-import org.springframework.boot.actuate.metrics.ambari.AbstractAmbariMetricWriter;
+import org.springframework.boot.actuate.metrics.ambari.AmbariMetricWriter;
 
-@SpringBootApplication(scanBasePackageClasses = { AbstractAmbariMetricWriter.class })
+@SpringBootApplication(scanBasePackageClasses = { AmbariMetricWriter.class, YourSpringBootApplication.class })
 public class YourSpringBootApplication {
 	public static void main(String[] args) {
 		new SpringApplication(YourSpringBootApplication.class).run(args);

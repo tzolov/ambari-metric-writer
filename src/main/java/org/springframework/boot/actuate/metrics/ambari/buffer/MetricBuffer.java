@@ -18,17 +18,19 @@
 package org.springframework.boot.actuate.metrics.ambari.buffer;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
-import it.unimi.dsi.fastutil.longs.Long2FloatArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2DoubleRBTreeMap;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.Metric;
@@ -52,17 +54,24 @@ public class MetricBuffer implements Closeable {
     /**
      * Metric buffer to fill before posting data to server.
      */
-    private Map<String, Map<Long, Float>> metricBuffer;
+    private Map<String, Map<Long, Double>> metricBuffer;
 
     /**
      * Keep the count of all metric entries collected in the namedMetricsBuffer map.
      */
     private AtomicLong bufferedMetricCount;
 
+    /**
+     * Metric value type (e.g. Long, Double ...) map. Type is resolved on first metric {@link #add(Metric)} and is
+     * retained for the duration of the application life-cycle. Run-time metric type altering is not allowed.
+     */
+    private final ConcurrentHashMap<String, String> metricTypeMap;
+
     public MetricBuffer() {
         this.bufferLock = new ReentrantLock();
         this.bufferedMetricCount = new AtomicLong(0);
-        this.metricBuffer = new HashMap<String, Map<Long, Float>>();
+        this.metricBuffer = new HashMap<String, Map<Long, Double>>();
+        this.metricTypeMap = new ConcurrentHashMap<String, String>();
     }
 
     /**
@@ -79,10 +88,12 @@ public class MetricBuffer implements Closeable {
                     String metricName = metric.getName();
 
                     if (!metricBuffer.containsKey(metricName)) {
-                        metricBuffer.put(metricName, new Long2FloatArrayMap());
+                        metricBuffer.put(metricName, new Long2DoubleRBTreeMap());
                     }
 
-                    metricBuffer.get(metricName).put(metric.getTimestamp().getTime(), metric.getValue().floatValue());
+                    metricBuffer.get(metricName).put(metric.getTimestamp().getTime(), metric.getValue().doubleValue());
+
+                    putMetricType(metric);
 
                     bufferedMetricCount.incrementAndGet();
 
@@ -95,6 +106,22 @@ public class MetricBuffer implements Closeable {
         }
     }
 
+    private void putMetricType(Metric<?> metric) {
+        if (!metricTypeMap.containsKey(metric.getName())) {
+            String metricType = ClassUtils.getShortCanonicalName(metric.getValue(), "Number");
+            metricTypeMap.putIfAbsent(metric.getName(), metricType);
+        }
+    }
+
+    /**
+     * @param metricName
+     *            Name of metric to provide type for.
+     * @return Returns the metric type (Long, Double, Float ...) for metric with name metricName.
+     */
+    public String getMetricType(String metricName) {
+        return metricTypeMap.get(metricName);
+    }
+
     /**
      * @return Returns the number of {@link Metric} added to buffer;
      */
@@ -105,17 +132,17 @@ public class MetricBuffer implements Closeable {
     /**
      * @return cleans the buffer and returns the last state.
      */
-    public Map<String, Map<Long, Float>> flush() {
+    public Map<String, Map<Long, Double>> flush() {
 
-        HashMap<String, Map<Long, Float>> snapshot = new HashMap<String, Map<Long, Float>>();
+        HashMap<String, Map<Long, Double>> snapshot = new HashMap<String, Map<Long, Double>>();
         try {
             if (bufferLock.tryLock() || bufferLock.tryLock(5, TimeUnit.SECONDS)) {
-                for (Entry<String, Map<Long, Float>> metricEntry : metricBuffer.entrySet()) {
+                for (Entry<String, Map<Long, Double>> metricEntry : metricBuffer.entrySet()) {
                     String metricName = metricEntry.getKey();
-                    Map<Long, Float> metricValues = metricEntry.getValue();
+                    Map<Long, Double> metricValues = metricEntry.getValue();
 
                     if (!isEmpty(metricValues)) {
-                        snapshot.put(metricName, ((Long2FloatArrayMap) metricValues).clone());
+                        snapshot.put(metricName, ((Long2DoubleRBTreeMap) metricValues).clone());
                         metricValues.clear();
                     }
                 }

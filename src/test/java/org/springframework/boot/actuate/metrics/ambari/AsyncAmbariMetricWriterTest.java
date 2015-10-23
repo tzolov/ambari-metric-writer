@@ -20,7 +20,7 @@ package org.springframework.boot.actuate.metrics.ambari;
 import org.junit.Before;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-public class AsyncAmbariMetricWriterTest extends AbstractAmbariMetricWriterTest {
+public class AsyncAmbariMetricWriterTest extends AmbariMetricWriterTest {
 
     private int metricsBufferSize = 10;
     private String ambariMetricsCollectorHost = "localhost";

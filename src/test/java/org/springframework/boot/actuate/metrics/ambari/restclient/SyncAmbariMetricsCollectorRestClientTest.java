@@ -58,10 +58,10 @@ public class SyncAmbariMetricsCollectorRestClientTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(
                         content().string(
-                                "{\"metrics\":[{\"metricname\":\"Metric Name\","
-                                        + "\"appid\":\"appid\",\"instanceid\":\"instance id\","
-                                        + "\"hostname\":\"a host\",\"starttime\":696969,\"metrics\":"
-                                        + "{\"666666\":666.666,\"999999\":999.999}}]}")).andRespond(withSuccess());
+                                "{\"metrics\":[{\"metricname\":\"Metric Name\",\"hostname\":\"a host\",\"timestamp\":0,"
+                                        + "\"appid\":\"appid\",\"instanceid\":\"instance id\",\"starttime\":696969,"
+                                        + "\"metrics\":{\"666666\":666.666,\"999999\":999.999}}]}"))
+                .andRespond(withSuccess());
 
         TimelineMetric tm = new TimelineMetric();
         tm.setAppId("appid");
@@ -69,9 +69,9 @@ public class SyncAmbariMetricsCollectorRestClientTest {
         tm.setInstanceId("instance id");
         tm.setMetricName("Metric Name");
         tm.setStartTime(696969L);
-        Map<Long, Float> metricValues = new TreeMap<Long, Float>();
-        metricValues.put(666666L, 666.666f);
-        metricValues.put(999999L, 999.999f);
+        Map<Long, Double> metricValues = new TreeMap<Long, Double>();
+        metricValues.put(666666L, 666.666);
+        metricValues.put(999999L, 999.999);
         tm.setMetricValues(metricValues);
 
         TimelineMetrics tms = new TimelineMetrics();

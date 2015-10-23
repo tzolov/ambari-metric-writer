@@ -22,7 +22,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetric;
-import org.springframework.util.Assert;
+import static org.junit.Assert.*;
 
 public class TimelineMetricFactoryTest {
 
@@ -37,13 +37,14 @@ public class TimelineMetricFactoryTest {
     public void testCreate() throws Exception {
         TimelineMetric metric = timelineMetricFactory.create();
 
-        Assert.notNull(metric);
-        Assert.isNull(metric.getAppId());
-        Assert.isNull(metric.getHostName());
-        Assert.isNull(metric.getInstanceId());
-        Assert.isTrue(metric.getStartTime() == 0);
-        Assert.isNull(metric.getMetricName());
-        Assert.isNull(metric.getMetricValues());
+        
+        assertNotNull(metric);
+        assertNull(metric.getAppId());
+        assertNull(metric.getHostName());
+        assertNull(metric.getInstanceId());
+        assertTrue(metric.getStartTime() == 0);
+        assertNull(metric.getMetricName());
+        assertNotNull(metric.getMetricValues());
     }
 
     @Test
@@ -55,23 +56,23 @@ public class TimelineMetricFactoryTest {
         metric.setInstanceId("instanceId");
         metric.setStartTime(666666);
         metric.setMetricName("MetricName");
-        metric.setMetricValues(new HashMap<Long, Float>());
+        metric.setMetricValues(new HashMap<Long, Double>());
 
-        Assert.notNull(metric);
-        Assert.notNull(metric.getAppId());
-        Assert.notNull(metric.getHostName());
-        Assert.notNull(metric.getInstanceId());
-        Assert.isTrue(metric.getStartTime() > 0);
-        Assert.notNull(metric.getMetricName());
-        Assert.notNull(metric.getMetricValues());
+        assertNotNull(metric);
+        assertNotNull(metric.getAppId());
+        assertNotNull(metric.getHostName());
+        assertNotNull(metric.getInstanceId());
+        assertTrue(metric.getStartTime() > 0);
+        assertNotNull(metric.getMetricName());
+        assertNotNull(metric.getMetricValues());
 
         timelineMetricFactory.passivateObject(timelineMetricFactory.wrap(metric));
 
-        Assert.isNull(metric.getAppId());
-        Assert.isNull(metric.getHostName());
-        Assert.isNull(metric.getInstanceId());
-        Assert.isTrue(metric.getStartTime() < 0);
-        Assert.isNull(metric.getMetricName());
-        Assert.isNull(metric.getMetricValues());
+        assertNull(metric.getAppId());
+        assertNull(metric.getHostName());
+        assertNull(metric.getInstanceId());
+        assertTrue(metric.getStartTime() < 0);
+        assertNull(metric.getMetricName());
+        assertNotNull(metric.getMetricValues());
     }
 }

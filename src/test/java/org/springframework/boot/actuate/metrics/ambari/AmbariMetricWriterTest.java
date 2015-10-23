@@ -32,10 +32,10 @@ import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-public abstract class AbstractAmbariMetricWriterTest {
+public abstract class AmbariMetricWriterTest {
 
     protected MockRestServiceServer mockServer;
-    protected AbstractAmbariMetricWriter ambariMetricWriter;
+    protected AmbariMetricWriter ambariMetricWriter;
 
     private Random random = new Random();
 
@@ -56,7 +56,7 @@ public abstract class AbstractAmbariMetricWriterTest {
         mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics")).andExpect(method(HttpMethod.POST))
                 .andExpect(jsonPath("$.metrics[*].metricname", contains("metric1"))).andRespond(withSuccess());
 
-        ambariMetricWriter.setBufferSize(0);
+        ambariMetricWriter.setMetricBufferSize(0);
 
         ambariMetricWriter.set(metric("metric1", random.nextLong(), 666f));
 
@@ -81,7 +81,7 @@ public abstract class AbstractAmbariMetricWriterTest {
 
         int expectedFlushCount = (int) metricSetCount / (bufferSize + 1);
 
-        ambariMetricWriter.setBufferSize(bufferSize);
+        ambariMetricWriter.setMetricBufferSize(bufferSize);
 
         for (int c = 0; c < expectedFlushCount; c++) {
             mockServer.expect(requestTo("http://localhost:6188/ws/v1/timeline/metrics"))

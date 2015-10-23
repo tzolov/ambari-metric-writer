@@ -23,6 +23,12 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetric;
 
+/**
+ * Object pool factory for the {@link TimelineMetric} object types.
+ * 
+ * @author tzolov@apache.org
+ *
+ */
 public class TimelineMetricFactory extends BasePooledObjectFactory<TimelineMetric> {
 
     @Override
@@ -42,7 +48,7 @@ public class TimelineMetricFactory extends BasePooledObjectFactory<TimelineMetri
         tm.getObject().setAppId(null);
         tm.getObject().setHostName(null);
         tm.getObject().setMetricName(null);
-        tm.getObject().setMetricValues(null);
+        tm.getObject().getMetricValues().clear();
         tm.getObject().setStartTime(-1);
     }
 }

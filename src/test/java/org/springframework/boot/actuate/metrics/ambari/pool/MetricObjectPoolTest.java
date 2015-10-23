@@ -24,7 +24,7 @@ public class MetricObjectPoolTest {
         assertThat(borrowedeMetrics(), is(0L));
         assertThat(activeMetrics(), is(0));
 
-        TimelineMetrics timelineMetrics = metricObjectPool.getTimelineMetrics();
+        TimelineMetrics timelineMetrics = metricObjectPool.getMetrics();
         assertNotNull(timelineMetrics);
 
         assertThat(borrowedeMetrics(), is(1L));
@@ -36,7 +36,7 @@ public class MetricObjectPoolTest {
         assertThat(borrowedeMetric(), is(0L));
         assertThat(activeMetric(), is(0));
 
-        TimelineMetric timelineMetric = metricObjectPool.getTimelineMetricFor(metricObjectPool.getTimelineMetrics());
+        TimelineMetric timelineMetric = metricObjectPool.getMetricFor(metricObjectPool.getMetrics());
         assertNotNull(timelineMetric);
 
         assertThat(borrowedeMetric(), is(1L));
@@ -49,13 +49,13 @@ public class MetricObjectPoolTest {
         assertThat(activeMetrics(), is(0));
         assertThat(activeMetric(), is(0));
 
-        TimelineMetrics metrics1 = metricObjectPool.getTimelineMetrics();
-        metricObjectPool.getTimelineMetricFor(metrics1);
-        metricObjectPool.getTimelineMetricFor(metrics1);
+        TimelineMetrics metrics1 = metricObjectPool.getMetrics();
+        metricObjectPool.getMetricFor(metrics1);
+        metricObjectPool.getMetricFor(metrics1);
 
-        TimelineMetrics metrics2 = metricObjectPool.getTimelineMetrics();
-        metricObjectPool.getTimelineMetricFor(metrics2);
-        metricObjectPool.getTimelineMetricFor(metrics2);
+        TimelineMetrics metrics2 = metricObjectPool.getMetrics();
+        metricObjectPool.getMetricFor(metrics2);
+        metricObjectPool.getMetricFor(metrics2);
 
         assertThat(idleMetrics(), is(0));
         assertThat(idleMetric(), is(0));
@@ -89,13 +89,13 @@ public class MetricObjectPoolTest {
         assertThat(activeMetrics(), is(0));
         assertThat(activeMetric(), is(0));
 
-        TimelineMetrics metrics1 = metricObjectPool.getTimelineMetrics();
-        metricObjectPool.getTimelineMetricFor(metrics1);
-        metricObjectPool.getTimelineMetricFor(metrics1);
+        TimelineMetrics metrics1 = metricObjectPool.getMetrics();
+        metricObjectPool.getMetricFor(metrics1);
+        metricObjectPool.getMetricFor(metrics1);
 
-        TimelineMetrics metrics2 = metricObjectPool.getTimelineMetrics();
-        metricObjectPool.getTimelineMetricFor(metrics2);
-        metricObjectPool.getTimelineMetricFor(metrics2);
+        TimelineMetrics metrics2 = metricObjectPool.getMetrics();
+        metricObjectPool.getMetricFor(metrics2);
+        metricObjectPool.getMetricFor(metrics2);
 
         assertThat(idleMetrics(), is(0));
         assertThat(idleMetric(), is(0));

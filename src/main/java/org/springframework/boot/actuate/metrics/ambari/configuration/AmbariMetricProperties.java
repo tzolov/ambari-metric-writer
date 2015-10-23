@@ -33,8 +33,8 @@ public class AmbariMetricProperties {
     /**
      * Optional application instance id
      */
-    @Value("${spring.application.index:${server.port:${PORT:null}}}")
-    private String instanceId;
+    @Value("${spring.application.index:${server.port:${PORT:}}}")
+    private String instanceId = null;
 
     /**
      * Metric buffer size to fill before posting data to server.

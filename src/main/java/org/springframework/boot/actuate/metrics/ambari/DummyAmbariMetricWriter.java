@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.ambari.domain.TimelineMetrics;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
@@ -35,7 +36,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * @author tzolov@apache.org
  *
  */
-public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
+public class DummyAmbariMetricWriter extends AmbariMetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(DummyAmbariMetricWriter.class);
     private ObjectMapper objectMapper;
@@ -49,6 +50,7 @@ public class DummyAmbariMetricWriter extends AbstractAmbariMetricWriter {
         objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.registerModule(module);
+        objectMapper.setSerializationInclusion(Include.NON_NULL);
     }
 
     @Override

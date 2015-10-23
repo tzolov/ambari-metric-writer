@@ -44,7 +44,6 @@ public class MetricObjectPool implements Closeable {
      * Object pools used for TimelineMetric and TimelineMetrics objects.
      */
     private GenericObjectPool<TimelineMetrics> timelineMetricsPool;
-
     private GenericObjectPool<TimelineMetric> timelineMetricPool;
 
     public MetricObjectPool(int timelineMetricsPoolSize, int timelineMeticPoolSize) {
@@ -57,14 +56,28 @@ public class MetricObjectPool implements Closeable {
         this.timelineMetricsPool.setMaxWaitMillis(FIVE_SECONDS);
     }
 
-    public TimelineMetric getTimelineMetricFor(TimelineMetrics metrics) throws Exception {
+    /**
+     * @return Returns a {@link TimelineMetrics} instance that represents and holds set of {@link TimelineMetric}
+     *         objects.
+     * @throws Exception
+     *             Thrown if it fails to obtain a new or reused object instance.
+     */
+    public TimelineMetrics getMetrics() throws Exception {
+        return timelineMetricsPool.borrowObject();
+    }
+
+    /**
+     * @param metrics
+     *            {@link TimelineMetrics} object that contains the {@link TimelineMetric} object returned. Note that you
+     *            can not borrow a {@link TimelineMetric} object that is not assigned a {@link TimelineMetrics}!
+     * @return Returns a {@link TimelineMetric} object part of the provided metrics set.
+     * @throws Exception
+     *             Thrown if it fails to obtain a new or reused object instance.
+     */
+    public TimelineMetric getMetricFor(TimelineMetrics metrics) throws Exception {
         TimelineMetric metric = timelineMetricPool.borrowObject();
         metrics.getMetrics().add(metric);
         return metric;
-    }
-
-    public TimelineMetrics getTimelineMetrics() throws Exception {
-        return timelineMetricsPool.borrowObject();
     }
 
     /**
@@ -72,7 +85,7 @@ public class MetricObjectPool implements Closeable {
      * 
      * @param timelineMetrics
      *            {@link TimelineMetrics} object to return to the timelineMetricsPool. {@link TimelineMetrics} contains
-     *            list of {@link TimelineMetric} in trun returned to the timelineMetricPool.
+     *            list of {@link TimelineMetric} in turn returned to the timelineMetricPool.
      */
     public void returnObjects(TimelineMetrics timelineMetrics) {
 
@@ -94,22 +107,22 @@ public class MetricObjectPool implements Closeable {
         this.timelineMetricsPool.returnObject(timelineMetrics);
     }
 
-    // Test only
+    @Override
+    public void close() throws IOException {
+        timelineMetricsPool.clear();
+        timelineMetricPool.clear();
+        timelineMetricsPool.close();
+        timelineMetricPool.close();
+    }
+
+    // ------------------------------------------------------------------------
+    // Getters/Setters used for test purposes only
+    // ------------------------------------------------------------------------
     public GenericObjectPool<TimelineMetrics> getTimelineMetricsPool() {
         return timelineMetricsPool;
     }
 
     public GenericObjectPool<TimelineMetric> getTimelineMetricPool() {
         return timelineMetricPool;
-    }
-
-    @Override
-    public void close() throws IOException {
-        timelineMetricsPool.clear();
-        timelineMetricPool.clear();
-
-        timelineMetricsPool.close();
-        timelineMetricPool.close();
-
     }
 }

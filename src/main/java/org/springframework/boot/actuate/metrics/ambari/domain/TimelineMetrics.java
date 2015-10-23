@@ -26,8 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The class that hosts a list of timeline entities.
+ * JSON encodable object representing a set of metrics transmitted to the Ambari Metrics Collector:
+ * https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification
+ * 
+ * @author tzolov@apache.org
+ *
  */
+
 @XmlRootElement(name = "metrics")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TimelineMetrics {

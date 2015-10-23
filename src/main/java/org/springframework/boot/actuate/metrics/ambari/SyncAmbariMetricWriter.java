@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
  * @author tzolov@apache.org
  *
  */
-public class SyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
+public class SyncAmbariMetricWriter extends AmbariMetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(SyncAmbariMetricWriter.class);
 

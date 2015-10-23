@@ -32,6 +32,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 /**
@@ -80,7 +81,8 @@ public class AsyncAmbariMetricsCollectorRestClient {
         MappingJackson2HttpMessageConverter mc = new MappingJackson2HttpMessageConverter();
         JaxbAnnotationModule module = new JaxbAnnotationModule();
         mc.getObjectMapper().registerModule(module);
-
+        mc.getObjectMapper().setSerializationInclusion(Include.NON_NULL);
+        
         AsyncRestTemplate restTemplate = new AsyncRestTemplate();
         restTemplate.getMessageConverters().clear();
         restTemplate.getMessageConverters().add(mc);

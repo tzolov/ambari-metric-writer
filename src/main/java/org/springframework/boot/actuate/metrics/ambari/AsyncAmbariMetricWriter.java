@@ -27,7 +27,7 @@ import org.springframework.boot.actuate.metrics.ambari.restclient.AsyncAmbariMet
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
+public class AsyncAmbariMetricWriter extends AmbariMetricWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncAmbariMetricWriter.class);
 
@@ -67,13 +67,13 @@ public class AsyncAmbariMetricWriter extends AbstractAmbariMetricWriter {
         public void onFailure(Throwable ex) {
             logger.warn("Failed to send timeline metrics!", ex);
             // Return the TimelineMetric objects to the pool
-            cleanMetricPool(timelineMetrics);
+            returnMetricPoolObjects(timelineMetrics);
         }
 
         @Override
         public void onSuccess(ResponseEntity<Map> result) {
             // Return the TimelineMetric objects to the pool
-            cleanMetricPool(timelineMetrics);
+            returnMetricPoolObjects(timelineMetrics);
         }
     }
 
