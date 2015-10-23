@@ -8,6 +8,8 @@ It provides a Spring Boot `MetricWriter` for the Apache [Ambari Metric System](h
 The [Spring Boot Actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready) includes a [Metrics Service](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) that automatically records all metrics and expoes them through the `metrics` endpoint. 
 The Metric Service provides a [PublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/PublicMetrics.java) interface that you can implement to expose custom metrics (look at [SystemPublicMetrics](http://github.com/spring-projects/spring-boot/tree/v1.2.7.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/SystemPublicMetrics.java) for an example). 
 
+The [export-metrics-example](https://github.com/tzolov/export-metrics-example) project shows how to build custom (`push` and `pull`) metrics and how to export them via the `ambari-metric-writer`. The [AmbariMetricExportExampleApplication.java](https://github.com/tzolov/export-metrics-example/blob/master/src/main/java/net/tzolov/springboot/metric/AmbariMetricExportExampleApplication.java) is self explanatory.  
+
 ### How To Use
 
 
