@@ -1,4 +1,4 @@
-# Spring Boot Metric Exporter For Apache Ambari Metric System
+# Spring Boot Metric Exporter For Apache Ambari Metric System [ ![Download](https://api.bintray.com/packages/big-data/maven/ambari-metric-writer/images/download.svg) ](https://api.bintray.com/packages/big-data/maven/ambari-metric-writer/_latestVersion)
 
 ### Overview
 The `ambari-metric-writer` exports (in real-time) all [spring application metrics] (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-metrics) to the [Apache Ambari Metric Collector](https://cwiki.apache.org/confluence/display/AMBARI/Metrics+Collector+API+Specification)
@@ -102,8 +102,8 @@ In addition to the common properties following properties configure the Ambari M
 | spring.metrics.export.ambari.enabled | true  | When set to false the ambari export is deactivated  |
 | spring.metrics.export.ambari.metrics-collector-host |  | Host of a Ambari Metrics Collector server host to receive exported metrics |
 | spring.metrics.export.ambari.metrics-collector-port | 6188 | Port of a Ambari Metrics Collector server to receive exported metrics |
-| spring.metrics.export.ambari.application-id | application.<radom int> | Uniquely identify service/application within Ambari Metrics Collector |
-| spring.metrics.export.ambari.host-name | <local IP>  | Secondary identifier |
+| spring.metrics.export.ambari.application-id | application.radom_value | Uniquely identify service/application within Ambari Metrics Collector |
+| spring.metrics.export.ambari.host-name |   | Secondary identifier |
 | spring.metrics.export.ambari.instance-id | null  | Application instance id. Required if multiple `application-id` are run in parallel |
 | spring.metrics.export.ambari.metrics-buffer-size | 100 | Metric buffer size to fill before posting data to server |
 
