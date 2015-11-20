@@ -70,10 +70,10 @@ public class TimelineMetric implements Comparable<TimelineMetric> {
      */
     private long startTime;
 
-    /**
-     * Metric number type
-     */
-    private String type;
+//    /**
+//     * Metric number type
+//     */
+//    private String type;
 
     /**
      * Metric values represented as a list of (metricTimestamp, metricValue) pairs.
@@ -86,7 +86,7 @@ public class TimelineMetric implements Comparable<TimelineMetric> {
     // copy constructor
     public TimelineMetric(TimelineMetric metric) {
         setMetricName(metric.getMetricName());
-        setType(metric.getType());
+//        setType(metric.getType());
         setTimestamp(metric.getTimestamp());
         setAppId(metric.getAppId());
         setInstanceId(metric.getInstanceId());
@@ -131,14 +131,14 @@ public class TimelineMetric implements Comparable<TimelineMetric> {
         this.hostName = hostName;
     }
 
-    @XmlElement(name = "type")
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+//    @XmlElement(name = "type")
+//    public String getType() {
+//        return this.type;
+//    }
+//
+//    public void setType(String type) {
+//        this.type = type;
+//    }
 
     @XmlElement(name = "timestamp")
     public long getTimestamp() {

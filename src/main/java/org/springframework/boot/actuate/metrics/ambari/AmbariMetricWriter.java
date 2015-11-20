@@ -184,7 +184,7 @@ public abstract class AmbariMetricWriter implements MetricWriter {
                         metric.setAppId(metricApplicationId);
                         metric.setHostName(metricHostName);
                         metric.setInstanceId(metricInstanceId);
-                        metric.setType(metricBuffer.getMetricType(metricName));
+//                        metric.setType(metricBuffer.getMetricType(metricName));
                         long startTime = computeStartTime(metricValues.keySet());
                         metric.setStartTime(startTime);
                         metric.setTimestamp(startTime); // Not sure of the exact semantics?
